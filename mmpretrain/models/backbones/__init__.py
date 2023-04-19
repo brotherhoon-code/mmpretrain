@@ -54,6 +54,17 @@ from .vig import PyramidVig, Vig
 from .vision_transformer import VisionTransformer
 from .xcit import XCiT
 
+from .carrot import Carrot
+from .custom_resnet import CustomResNet
+from .official_resnet import CustomResNet2
+from .custom_seresnet import CustomSEResNet
+from .custom_cbam import CustomCBAM
+from .custom_nonlocal_resnet import CustomNonLocalResNet
+from .custom_nonlocal_resnet2 import CustomNonLocalResNet2
+from .custom_gcnet import CustomGCNet
+from .custom_gcnet2 import CustomGCNet2
+
+
 __all__ = [
     'LeNet5',
     'AlexNet',
@@ -116,4 +127,14 @@ __all__ = [
     'Vig',
     'PyramidVig',
     'XCiT',
-]
+    
+    'Carrot',
+    'CustomResNet',
+    'CustomResNet2',
+    'CustomSEResNet',
+    'CustomCBAM',
+    'CustomNonLocalResNet',
+    'CustomNonLocalResNet2',
+    'CustomGCNet',
+    'CustomGCNet2'
+    ]

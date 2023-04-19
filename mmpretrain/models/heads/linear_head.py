@@ -53,7 +53,12 @@ class LinearClsHead(ClsHead):
         """
         # The LinearClsHead doesn't have other module, just return after
         # unpacking.
+        
         return feats[-1]
+        if isinstance(feats, tuple): # 🐬 modify this
+            feats = feats[-1]
+        return feats
+        
 
     def forward(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
         """The forward process."""
