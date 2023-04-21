@@ -1,7 +1,7 @@
 # dataset settings
 dataset_type = 'ImageNet'
 data_preprocessor = dict(
-    num_classes=10,
+    num_classes=20,
     # RGB format normalization parameters
     mean=[123.675, 116.28, 103.53],
     std=[58.395, 57.12, 57.375],
@@ -29,8 +29,8 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/train_10.txt',
-        data_prefix='train_10',
+        ann_file='meta/train_20.txt',
+        data_prefix='train_20',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
@@ -41,8 +41,8 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/val_10.txt',
-        data_prefix='val_10',
+        ann_file='meta/val_20.txt',
+        data_prefix='val_20',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
@@ -81,7 +81,7 @@ visualizer = dict(type='UniversalVisualizer',
                   vis_backends=[
                       dict(
                           type='WandbVisBackend', 
-                          init_kwargs=dict(project='cls-model-exp', 
+                          init_kwargs=dict(project='in20', 
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -94,15 +94,16 @@ model = dict(
                   block_type = "BottleneckResBlock",
                   stem_type = "Resnet",
                   stem_channels = 64,
-                  stage_blocks = [3, 4, 6, 3], 
-                  feature_channels = [96, 192, 384, 768],
-                  stage_out_channels = [192, 384, 768, 3072],
+                  stage_blocks = [3, 3, 9, 3], 
+                  feature_channels = [64, 128, 256, 512],
+                  stage_out_channels = [256, 512, 1024, 2048],
                   strides = [1,2,2,2],
+                  isDepthwise=[True, True, True, True],
                   ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
-        num_classes=10,
+        num_classes=20,
         in_channels=2048,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
 

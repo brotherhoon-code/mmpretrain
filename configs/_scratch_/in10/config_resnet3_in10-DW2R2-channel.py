@@ -104,7 +104,7 @@ model = dict(
     head=dict(
         type='LinearClsHead',
         num_classes=10,
-        in_channels=2048,
+        in_channels=3072,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
 
 launcher = 'none'
