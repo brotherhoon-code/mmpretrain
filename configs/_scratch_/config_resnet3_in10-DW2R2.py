@@ -90,10 +90,16 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type = 'CustomSEResNet', 
-                  deep_stem = True, 
-                  activation_func ='sigmoid', 
-                  fusion_type = 'add'),
+    backbone=dict(type='CustomResNet3', 
+                  block_type = "BottleneckResBlock",
+                  stem_type = "Resnet",
+                  stem_channels = 64,
+                  stage_blocks = [3, 4, 6, 3], 
+                  feature_channels = [64, 128, 256, 512],
+                  stage_out_channels = [256, 512, 1024, 2048],
+                  strides = [1,2,2,2],
+                  isDepthwise=[True, True, False, False],
+                  ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',

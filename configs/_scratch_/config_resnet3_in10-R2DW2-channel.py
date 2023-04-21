@@ -90,8 +90,16 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomCBAM', 
-                  deep_stem=True),
+    backbone=dict(type='CustomResNet3', 
+                  block_type = "BottleneckResBlock",
+                  stem_type = "Resnet",
+                  stem_channels = 64,
+                  stage_blocks = [3, 4, 6, 3], 
+                  feature_channels = [96, 192, 384, 768],
+                  stage_out_channels = [192, 384, 768, 3072],
+                  strides = [1,2,2,2],
+                  isDepthwise=[False, False, True, True],
+                  ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',

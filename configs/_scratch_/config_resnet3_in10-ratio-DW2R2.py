@@ -36,7 +36,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=128,
+    batch_size=32,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -58,7 +58,7 @@ optim_wrapper = dict(
 param_scheduler = dict(
     type='MultiStepLR', by_epoch=True, milestones=[30, 60, 90], gamma=0.1)
 
-train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=10)
+train_cfg = dict(by_epoch=True, max_epochs=100, val_interval=10)
 val_cfg = dict()
 test_cfg = dict()
 
@@ -90,10 +90,16 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type = 'CustomSEResNet', 
-                  deep_stem = True, 
-                  activation_func ='tanh', 
-                  fusion_type = 'scale'),
+    backbone=dict(type='CustomResNet3', 
+                  block_type = "BottleneckResBlock",
+                  stem_type = "Resnet",
+                  stem_channels = 64,
+                  stage_blocks = [3, 3, 9, 3], 
+                  feature_channels = [64, 128, 256, 512],
+                  stage_out_channels = [256, 512, 1024, 2048],
+                  strides = [1,2,2,2],
+                  isDepthwise=[True, True, False, False],
+                  ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',

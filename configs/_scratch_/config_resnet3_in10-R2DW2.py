@@ -87,17 +87,26 @@ log_level = 'INFO'
 load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=True)
+
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomGCNet', 
-                  deep_stem = True, 
-                  n_classes=10, 
-                  n_context_stage_idx=[1,2,3,4]),
+    backbone=dict(type='CustomResNet3', 
+                  block_type = "BottleneckResBlock",
+                  stem_type = "Resnet",
+                  stem_channels = 64,
+                  stage_blocks = [3, 4, 6, 3], 
+                  feature_channels = [64, 128, 256, 512],
+                  stage_out_channels = [256, 512, 1024, 2048],
+                  strides = [1,2,2,2],
+                  isDepthwise=[False, False, True, True],
+                  ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=10,
         in_channels=2048,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
+
 launcher = 'none'
+
 work_dir = './work_dir/config_carrot'

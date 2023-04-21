@@ -90,10 +90,14 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomNonLocalResNet',
-                  deep_stem=True,
-                  n_local_cls="ConcatNonLocalBlock",
-                  n_local_stage_idx=[3]
+    backbone=dict(type='CustomResNet3', 
+                  block_type = "BottleneckResBlock",
+                  stem_type = "Resnet",
+                  stem_channels = 64,
+                  stage_blocks = [3, 3, 9, 3], 
+                  feature_channels = [64, 128, 256, 512],
+                  stage_out_channels = [256, 512, 1024, 2048],
+                  strides = [1,2,2,2],
                   ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
@@ -104,4 +108,4 @@ model = dict(
 
 launcher = 'none'
 
-work_dir = './work_dir/config_nonlocalnet-cifar100-s2s3-concat'
+work_dir = './work_dir/config_carrot'
