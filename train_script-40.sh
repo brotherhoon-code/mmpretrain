@@ -66,22 +66,22 @@ WORK_DIR16=./work_dir/${CONFIG_NAME16}
 
 
 
-EXP_NAME01=${CONFIG_NAME01}-sgd-b64
-EXP_NAME02=${CONFIG_NAME02}-sgd-b64
-EXP_NAME03=${CONFIG_NAME03}-sgd-b64
-EXP_NAME04=${CONFIG_NAME04}-sgd-b64
-EXP_NAME05=${CONFIG_NAME05}-sgd-b64
-EXP_NAME06=${CONFIG_NAME06}-sgd-b64
-EXP_NAME07=${CONFIG_NAME07}-sgd-b64
-EXP_NAME08=${CONFIG_NAME08}-sgd-b64
-EXP_NAME09=${CONFIG_NAME09}-sgd-b64
-EXP_NAME10=${CONFIG_NAME10}-sgd-b64
-EXP_NAME11=${CONFIG_NAME11}-sgd-b64
-EXP_NAME12=${CONFIG_NAME12}-sgd-b64
-EXP_NAME13=${CONFIG_NAME13}-sgd-b64
-EXP_NAME14=${CONFIG_NAME14}-sgd-b64
-EXP_NAME15=${CONFIG_NAME15}-sgd-b64
-EXP_NAME16=${CONFIG_NAME16}-sgd-b64
+EXP_NAME01=${CONFIG_NAME01}-sgd-b128
+EXP_NAME02=${CONFIG_NAME02}-sgd-b128
+EXP_NAME03=${CONFIG_NAME03}-sgd-b128
+EXP_NAME04=${CONFIG_NAME04}-sgd-b128
+EXP_NAME05=${CONFIG_NAME05}-sgd-b128
+EXP_NAME06=${CONFIG_NAME06}-sgd-b128
+EXP_NAME07=${CONFIG_NAME07}-sgd-b128
+EXP_NAME08=${CONFIG_NAME08}-sgd-b128
+EXP_NAME09=${CONFIG_NAME09}-sgd-b128
+EXP_NAME10=${CONFIG_NAME10}-sgd-b128
+EXP_NAME11=${CONFIG_NAME11}-sgd-b128
+EXP_NAME12=${CONFIG_NAME12}-sgd-b128
+EXP_NAME13=${CONFIG_NAME13}-sgd-b128
+EXP_NAME14=${CONFIG_NAME14}-sgd-b128
+EXP_NAME15=${CONFIG_NAME15}-sgd-b128
+EXP_NAME16=${CONFIG_NAME16}-sgd-b128
 
 
 
@@ -89,15 +89,15 @@ SEED=42
 
 
 
-# python tools/train.py ${CONFIG_FILE01} --work-dir ${WORK_DIR01} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME01}
-# python tools/train.py ${CONFIG_FILE02} --work-dir ${WORK_DIR02} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME02}
+python tools/train.py ${CONFIG_FILE01} --work-dir ${WORK_DIR01} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME01}
+python tools/train.py ${CONFIG_FILE02} --work-dir ${WORK_DIR02} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME02}
 python tools/train.py ${CONFIG_FILE03} --work-dir ${WORK_DIR03} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME03}
-# python tools/train.py ${CONFIG_FILE04} --work-dir ${WORK_DIR04} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME04}
-# python tools/train.py ${CONFIG_FILE05} --work-dir ${WORK_DIR05} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME05}
-# python tools/train.py ${CONFIG_FILE06} --work-dir ${WORK_DIR06} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME06}
-# python tools/train.py ${CONFIG_FILE07} --work-dir ${WORK_DIR07} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME07}
-# python tools/train.py ${CONFIG_FILE08} --work-dir ${WORK_DIR08} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME08}
-# python tools/train.py ${CONFIG_FILE09} --work-dir ${WORK_DIR09} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME09}
-# python tools/train.py ${CONFIG_FILE10} --work-dir ${WORK_DIR10} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME10}
-# python tools/train.py ${CONFIG_FILE11} --work-dir ${WORK_DIR11} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME11}
-# python tools/train.py ${CONFIG_FILE12} --work-dir ${WORK_DIR12} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME12}
+python tools/train.py ${CONFIG_FILE04} --work-dir ${WORK_DIR04} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME04}
+python tools/train.py ${CONFIG_FILE05} --work-dir ${WORK_DIR05} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME05}
+python tools/train.py ${CONFIG_FILE06} --work-dir ${WORK_DIR06} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME06}
+python tools/train.py ${CONFIG_FILE07} --work-dir ${WORK_DIR07} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME07}
+python tools/train.py ${CONFIG_FILE08} --work-dir ${WORK_DIR08} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME08}
+python tools/train.py ${CONFIG_FILE09} --work-dir ${WORK_DIR09} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME09}
+python tools/train.py ${CONFIG_FILE10} --work-dir ${WORK_DIR10} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME10}
+python tools/train.py ${CONFIG_FILE11} --work-dir ${WORK_DIR11} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME11}
+python tools/train.py ${CONFIG_FILE12} --work-dir ${WORK_DIR12} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME12}

@@ -24,25 +24,25 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=64,
+    batch_size=128,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/train_20.txt',
-        data_prefix='train_20',
+        ann_file='meta/train_40.txt',
+        data_prefix='train_40',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
 
 val_dataloader = dict(
-    batch_size=64,
+    batch_size=128,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/val_20.txt',
-        data_prefix='val_20',
+        ann_file='meta/val_40.txt',
+        data_prefix='val_40',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
@@ -56,7 +56,7 @@ test_evaluator = val_evaluator
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
-        lr=5e-4 * 32 * 1 / 512,
+        lr=5e-4 * 128 * 1 / 512,
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
@@ -107,7 +107,7 @@ visualizer = dict(type='UniversalVisualizer',
                   vis_backends=[
                       dict(
                           type='WandbVisBackend', 
-                          init_kwargs=dict(project='in20', 
+                          init_kwargs=dict(project='in40', 
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None

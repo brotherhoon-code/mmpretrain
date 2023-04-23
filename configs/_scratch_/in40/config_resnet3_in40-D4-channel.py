@@ -24,25 +24,25 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=64,
+    batch_size=128,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/train_20.txt',
-        data_prefix='train_20',
+        ann_file='meta/train_40.txt',
+        data_prefix='train_40',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
 
 val_dataloader = dict(
-    batch_size=64,
+    batch_size=128,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/val_20.txt',
-        data_prefix='val_20',
+        ann_file='meta/val_40.txt',
+        data_prefix='val_40',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
@@ -81,7 +81,7 @@ visualizer = dict(type='UniversalVisualizer',
                   vis_backends=[
                       dict(
                           type='WandbVisBackend', 
-                          init_kwargs=dict(project='in20', 
+                          init_kwargs=dict(project='in40', 
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -93,7 +93,7 @@ model = dict(
     backbone=dict(type='CustomResNet3', 
                   block_type = "BottleneckResBlock",
                   stem_type = "Resnet",
-                  stem_channels = 64,
+                  stem_channels = 96,
                   stage_blocks = [3, 4, 6, 3], 
                   feature_channels = [96, 192, 384, 768],
                   stage_out_channels = [192, 384, 768, 3072],
