@@ -175,6 +175,7 @@ class CustomResNet3(nn.Module):
         self.stage3 = self._make_stage(block, stage_blocks[2], strides[2], stage_out_channels[1], feature_channels[2], stage_out_channels[2], act_func, 2, **kwargs)
         self.stage4 = self._make_stage(block, stage_blocks[3], strides[3], stage_out_channels[2], feature_channels[3], stage_out_channels[3], act_func, 3, **kwargs)
 
+        print(self.stem)
         print(self.stage1)
         print(self.stage2)
         print(self.stage3)

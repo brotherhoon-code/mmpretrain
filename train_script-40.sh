@@ -3,47 +3,47 @@
 
 ### conv-type 비교 실험
 # conv
-CONFIG_NAME01=config_resnet3_in20-R4 # check
-CONFIG_NAME02=config_resnet3_in20-D4 # check
-CONFIG_NAME03=config_resnet3_in20-R2D2 # check
-CONFIG_NAME04=config_resnet3_in20-D2R2 # check
+CONFIG_NAME01=config_resnet3_in40-R4 # check
+CONFIG_NAME02=config_resnet3_in40-D4 # check
+CONFIG_NAME03=config_resnet3_in40-R2D2 # check
+CONFIG_NAME04=config_resnet3_in40-D2R2 # check
 
 # ratio
-CONFIG_NAME05=config_resnet3_in20-R4-ratio # check
-CONFIG_NAME06=config_resnet3_in20-D4-ratio # check
-CONFIG_NAME07=config_resnet3_in20-R2D2-ratio # check
-CONFIG_NAME08=config_resnet3_in20-D2R2-ratio # check
+CONFIG_NAME05=config_resnet3_in40-R4-ratio # check
+CONFIG_NAME06=config_resnet3_in40-D4-ratio # check
+CONFIG_NAME07=config_resnet3_in40-R2D2-ratio # check
+CONFIG_NAME08=config_resnet3_in40-D2R2-ratio # check
 
 # channels
-CONFIG_NAME09=config_resnet3_in20-R4-channel # check
-CONFIG_NAME10=config_resnet3_in20-D4-channel # check
-CONFIG_NAME11=config_resnet3_in20-R2D2-channel # check
-CONFIG_NAME12=config_resnet3_in20-D2R2-channel # check
+CONFIG_NAME09=config_resnet3_in40-R4-channel # check
+CONFIG_NAME10=config_resnet3_in40-D4-channel # check
+CONFIG_NAME11=config_resnet3_in40-R2D2-channel # check
+CONFIG_NAME12=config_resnet3_in40-D2R2-channel # check
 
 # full
-CONFIG_NAME13=config_resnet3_in20-R4-channel-ratio-deit
-CONFIG_NAME14=config_resnet3_in20-D4-channel-ratio-deit
-CONFIG_NAME15=config_resnet3_in20-R2D2-channel-ratio-deit
-CONFIG_NAME16=config_resnet3_in20-D2R2-channel-ratio-deit
+CONFIG_NAME13=config_resnet3_in40-R4-channel-ratio-deit
+CONFIG_NAME14=config_resnet3_in40-D4-channel-ratio-deit
+CONFIG_NAME15=config_resnet3_in40-R2D2-channel-ratio-deit
+CONFIG_NAME16=config_resnet3_in40-D2R2-channel-ratio-deit
 
 
 
-CONFIG_FILE01=./configs/_scratch_/in20/${CONFIG_NAME01}.py
-CONFIG_FILE02=./configs/_scratch_/in20/${CONFIG_NAME02}.py
-CONFIG_FILE03=./configs/_scratch_/in20/${CONFIG_NAME03}.py 
-CONFIG_FILE04=./configs/_scratch_/in20/${CONFIG_NAME04}.py 
-CONFIG_FILE05=./configs/_scratch_/in20/${CONFIG_NAME05}.py 
-CONFIG_FILE06=./configs/_scratch_/in20/${CONFIG_NAME06}.py
-CONFIG_FILE07=./configs/_scratch_/in20/${CONFIG_NAME07}.py
-CONFIG_FILE08=./configs/_scratch_/in20/${CONFIG_NAME08}.py
-CONFIG_FILE09=./configs/_scratch_/in20/${CONFIG_NAME09}.py
-CONFIG_FILE10=./configs/_scratch_/in20/${CONFIG_NAME10}.py
-CONFIG_FILE11=./configs/_scratch_/in20/${CONFIG_NAME11}.py
-CONFIG_FILE12=./configs/_scratch_/in20/${CONFIG_NAME12}.py
-CONFIG_FILE13=./configs/_scratch_/in20/${CONFIG_NAME13}.py
-CONFIG_FILE14=./configs/_scratch_/in20/${CONFIG_NAME14}.py
-CONFIG_FILE15=./configs/_scratch_/in20/${CONFIG_NAME15}.py
-CONFIG_FILE16=./configs/_scratch_/in20/${CONFIG_NAME16}.py
+CONFIG_FILE01=./configs/_scratch_/in40/${CONFIG_NAME01}.py
+CONFIG_FILE02=./configs/_scratch_/in40/${CONFIG_NAME02}.py
+CONFIG_FILE03=./configs/_scratch_/in40/${CONFIG_NAME03}.py 
+CONFIG_FILE04=./configs/_scratch_/in40/${CONFIG_NAME04}.py 
+CONFIG_FILE05=./configs/_scratch_/in40/${CONFIG_NAME05}.py 
+CONFIG_FILE06=./configs/_scratch_/in40/${CONFIG_NAME06}.py
+CONFIG_FILE07=./configs/_scratch_/in40/${CONFIG_NAME07}.py
+CONFIG_FILE08=./configs/_scratch_/in40/${CONFIG_NAME08}.py
+CONFIG_FILE09=./configs/_scratch_/in40/${CONFIG_NAME09}.py
+CONFIG_FILE10=./configs/_scratch_/in40/${CONFIG_NAME10}.py
+CONFIG_FILE11=./configs/_scratch_/in40/${CONFIG_NAME11}.py
+CONFIG_FILE12=./configs/_scratch_/in40/${CONFIG_NAME12}.py
+CONFIG_FILE13=./configs/_scratch_/in40/${CONFIG_NAME13}.py
+CONFIG_FILE14=./configs/_scratch_/in40/${CONFIG_NAME14}.py
+CONFIG_FILE15=./configs/_scratch_/in40/${CONFIG_NAME15}.py
+CONFIG_FILE16=./configs/_scratch_/in40/${CONFIG_NAME16}.py
 
 
 
@@ -66,22 +66,22 @@ WORK_DIR16=./work_dir/${CONFIG_NAME16}
 
 
 
-EXP_NAME01=${CONFIG_NAME01}-sgd-b32
-EXP_NAME02=${CONFIG_NAME02}-sgd-b32
-EXP_NAME03=${CONFIG_NAME03}-sgd-b32
-EXP_NAME04=${CONFIG_NAME04}-sgd-b32
-EXP_NAME05=${CONFIG_NAME05}-sgd-b32
-EXP_NAME06=${CONFIG_NAME06}-sgd-b32
-EXP_NAME07=${CONFIG_NAME07}-sgd-b32
-EXP_NAME08=${CONFIG_NAME08}-sgd-b32
-EXP_NAME09=${CONFIG_NAME09}-sgd-b32
-EXP_NAME10=${CONFIG_NAME10}-sgd-b32
-EXP_NAME11=${CONFIG_NAME11}-sgd-b32
-EXP_NAME12=${CONFIG_NAME12}-sgd-b32
-EXP_NAME13=${CONFIG_NAME13}-sgd-b32
-EXP_NAME14=${CONFIG_NAME14}-sgd-b32
-EXP_NAME15=${CONFIG_NAME15}-sgd-b32
-EXP_NAME16=${CONFIG_NAME16}-sgd-b32
+EXP_NAME01=${CONFIG_NAME01}-sgd-b64
+EXP_NAME02=${CONFIG_NAME02}-sgd-b64
+EXP_NAME03=${CONFIG_NAME03}-sgd-b64
+EXP_NAME04=${CONFIG_NAME04}-sgd-b64
+EXP_NAME05=${CONFIG_NAME05}-sgd-b64
+EXP_NAME06=${CONFIG_NAME06}-sgd-b64
+EXP_NAME07=${CONFIG_NAME07}-sgd-b64
+EXP_NAME08=${CONFIG_NAME08}-sgd-b64
+EXP_NAME09=${CONFIG_NAME09}-sgd-b64
+EXP_NAME10=${CONFIG_NAME10}-sgd-b64
+EXP_NAME11=${CONFIG_NAME11}-sgd-b64
+EXP_NAME12=${CONFIG_NAME12}-sgd-b64
+EXP_NAME13=${CONFIG_NAME13}-sgd-b64
+EXP_NAME14=${CONFIG_NAME14}-sgd-b64
+EXP_NAME15=${CONFIG_NAME15}-sgd-b64
+EXP_NAME16=${CONFIG_NAME16}-sgd-b64
 
 
 

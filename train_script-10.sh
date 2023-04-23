@@ -1,30 +1,36 @@
 #!/bin/sh
-### {ratio}-{block-type}-{conv-type}-{recipe}-{channel}
+### config_{모델}_{데이터셋}-{블럭타입+블럭반복회수}-{channel}-{ratio}-{recipe}
 
 ### conv-type 비교 실험
 # conv
-CONFIG_NAME01=config_resnet3_in10 # check
-CONFIG_NAME02=config_resnet3_in10-DW # check
-CONFIG_NAME03=config_resnet3_in10-R2DW2 # check
-CONFIG_NAME04=config_resnet3_in10-DW2R2 # check
+CONFIG_NAME01=config_resnet3_in10-R4 # check
+CONFIG_NAME02=config_resnet3_in10-D4 # check
+CONFIG_NAME03=config_resnet3_in10-R2D2 # check
+CONFIG_NAME04=config_resnet3_in10-D2R2 # check
 
 # ratio
-CONFIG_NAME05=config_resnet3_in10-ratio # check
-CONFIG_NAME06=config_resnet3_in10-ratio-DW # check
-CONFIG_NAME07=config_resnet3_in10-ratio-R2DW2 # check
-CONFIG_NAME08=config_resnet3_in10-ratio-DW2R2 # check
+CONFIG_NAME05=config_resnet3_in10-R4-ratio # check
+CONFIG_NAME06=config_resnet3_in10-D4-ratio # check
+CONFIG_NAME07=config_resnet3_in10-R2D2-ratio # check
+CONFIG_NAME08=config_resnet3_in10-D2R2-ratio # check
 
 # channels
-CONFIG_NAME09=config_resnet3_in10-channel # check
-CONFIG_NAME10=config_resnet3_in10-DW-channel # check
-CONFIG_NAME11=config_resnet3_in10-R2DW2-channel # check
-CONFIG_NAME12=config_resnet3_in10-DW2R2-channel # check
+CONFIG_NAME09=config_resnet3_in10-R4-channel # check
+CONFIG_NAME10=config_resnet3_in10-D4-channel # check
+CONFIG_NAME11=config_resnet3_in10-R2D2-channel # check
+CONFIG_NAME12=config_resnet3_in10-D2R2-channel # check
 
 # recipe
-CONFIG_NAME13=config_resnet3_in10-deit # check
-CONFIG_NAME14=config_resnet3_in10-DW-deit # check
-CONFIG_NAME15=config_resnet3_in10-R2DW2-deit # check
-CONFIG_NAME16=config_resnet3_in10-DW2R2-deit # check
+CONFIG_NAME13=config_resnet3_in10-R4-deit # check
+CONFIG_NAME14=config_resnet3_in10-D4-deit # check
+CONFIG_NAME15=config_resnet3_in10-R2D2-deit # check
+CONFIG_NAME16=config_resnet3_in10-D2R2-deit # check
+
+# full
+CONFIG_NAME17=config_resnet3_in10-R4-channel-ratio-deit
+CONFIG_NAME18=config_resnet3_in10-D4-channel-ratio-deit
+CONFIG_NAME19=config_resnet3_in10-R2D2-channel-ratio-deit
+CONFIG_NAME20=config_resnet3_in10-D2R2-channel-ratio-deit
 
 
 CONFIG_FILE01=./configs/_scratch_/in10/${CONFIG_NAME01}.py
@@ -43,6 +49,11 @@ CONFIG_FILE13=./configs/_scratch_/in10/${CONFIG_NAME13}.py
 CONFIG_FILE14=./configs/_scratch_/in10/${CONFIG_NAME14}.py
 CONFIG_FILE15=./configs/_scratch_/in10/${CONFIG_NAME15}.py
 CONFIG_FILE16=./configs/_scratch_/in10/${CONFIG_NAME16}.py
+CONFIG_FILE17=./configs/_scratch_/in10/${CONFIG_NAME17}.py
+CONFIG_FILE18=./configs/_scratch_/in10/${CONFIG_NAME18}.py
+CONFIG_FILE19=./configs/_scratch_/in10/${CONFIG_NAME19}.py
+CONFIG_FILE20=./configs/_scratch_/in10/${CONFIG_NAME20}.py
+
 
 
 
@@ -62,6 +73,10 @@ WORK_DIR13=./work_dir/${CONFIG_NAME13}
 WORK_DIR14=./work_dir/${CONFIG_NAME14}
 WORK_DIR15=./work_dir/${CONFIG_NAME15}
 WORK_DIR16=./work_dir/${CONFIG_NAME16}
+WORK_DIR17=./work_dir/${CONFIG_NAME17}
+WORK_DIR18=./work_dir/${CONFIG_NAME18}
+WORK_DIR19=./work_dir/${CONFIG_NAME19}
+WORK_DIR20=./work_dir/${CONFIG_NAME20}
 
 
 
@@ -81,6 +96,10 @@ EXP_NAME13=${CONFIG_NAME13}-sgd-b32
 EXP_NAME14=${CONFIG_NAME14}-sgd-b32
 EXP_NAME15=${CONFIG_NAME15}-sgd-b32
 EXP_NAME16=${CONFIG_NAME16}-sgd-b32
+EXP_NAME17=${CONFIG_NAME17}-sgd-b32
+EXP_NAME18=${CONFIG_NAME18}-sgd-b32
+EXP_NAME19=${CONFIG_NAME19}-sgd-b32
+EXP_NAME20=${CONFIG_NAME20}-sgd-b32
 
 
 
@@ -96,11 +115,15 @@ SEED=42
 # python tools/train.py ${CONFIG_FILE06} --work-dir ${WORK_DIR06} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME06}
 # python tools/train.py ${CONFIG_FILE07} --work-dir ${WORK_DIR07} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME07}
 # python tools/train.py ${CONFIG_FILE08} --work-dir ${WORK_DIR08} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME08}
-# python tools/train.py ${CONFIG_FILE09} --work-dir ${WORK_DIR09} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME09}
-# python tools/train.py ${CONFIG_FILE10} --work-dir ${WORK_DIR10} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME10}
-# python tools/train.py ${CONFIG_FILE11} --work-dir ${WORK_DIR11} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME11}
-# python tools/train.py ${CONFIG_FILE12} --work-dir ${WORK_DIR12} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME12}
-python tools/train.py ${CONFIG_FILE13} --work-dir ${WORK_DIR13} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME13}
-python tools/train.py ${CONFIG_FILE14} --work-dir ${WORK_DIR14} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME14}
-python tools/train.py ${CONFIG_FILE15} --work-dir ${WORK_DIR15} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME15}
-python tools/train.py ${CONFIG_FILE16} --work-dir ${WORK_DIR16} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME16}
+python tools/train.py ${CONFIG_FILE09} --work-dir ${WORK_DIR09} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME09}
+python tools/train.py ${CONFIG_FILE10} --work-dir ${WORK_DIR10} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME10}
+python tools/train.py ${CONFIG_FILE11} --work-dir ${WORK_DIR11} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME11}
+python tools/train.py ${CONFIG_FILE12} --work-dir ${WORK_DIR12} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME12}
+# python tools/train.py ${CONFIG_FILE13} --work-dir ${WORK_DIR13} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME13}
+# python tools/train.py ${CONFIG_FILE14} --work-dir ${WORK_DIR14} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME14}
+# python tools/train.py ${CONFIG_FILE15} --work-dir ${WORK_DIR15} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME15}
+# python tools/train.py ${CONFIG_FILE16} --work-dir ${WORK_DIR16} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME16}
+# python tools/train.py ${CONFIG_FILE17} --work-dir ${WORK_DIR17} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME17}
+# python tools/train.py ${CONFIG_FILE18} --work-dir ${WORK_DIR18} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME18}
+# python tools/train.py ${CONFIG_FILE19} --work-dir ${WORK_DIR19} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME19}
+# python tools/train.py ${CONFIG_FILE20} --work-dir ${WORK_DIR20} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME20}
