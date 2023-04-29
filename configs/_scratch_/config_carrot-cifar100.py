@@ -99,7 +99,8 @@ visualizer = dict(type='UniversalVisualizer',
                   vis_backends=[
                       dict(
                           type='WandbVisBackend', 
-                          init_kwargs=dict(project='cls-model-exp', 
+                          init_kwargs=dict(entity='brotherhoon88',
+                                           project='convolution-attention',
                                            name='config_carrot-cifar100'))])
 
 log_level = 'INFO'

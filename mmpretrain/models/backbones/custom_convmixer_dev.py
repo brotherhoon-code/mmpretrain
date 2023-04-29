@@ -4,7 +4,6 @@ from torchsummary import summary
 import torch.nn.functional as F
 from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
-from ..builder import BACKBONES
 
 
 class PatchEmbedBlock(nn.Module):
@@ -26,7 +25,6 @@ class PatchEmbedBlock(nn.Module):
         x = self.active_func(x)
         x = self.bn_layer(x)
         return x # b dim h/patch_size w/patch_size
-
 
 class SpatialMixBlock(nn.Module):
     def __init__(self, 
@@ -51,7 +49,6 @@ class SpatialMixBlock(nn.Module):
         x = self.active_func(x)
         x = self.bn_layer(x)
         return x
-
 
 class ChannelMixBlock(nn.Module):
     def __init__(self, 
@@ -78,6 +75,7 @@ class MixerBlock(nn.Module):
         self.dim = dim
         self.kernel_size = kernel_size
         self.block_type = block_type
+        
         if block_type == "dw-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block = ChannelMixBlock(dim) # p
@@ -129,7 +127,6 @@ class MixerBlock(nn.Module):
         return x
 
 
-@BACKBONES.register_module()
 class CustomConvMixer(nn.Module):
     def __init__(self, 
                  block_type=["dw-p", "dw-p", "dw-p", "dw-p"], # homo case
@@ -198,6 +195,7 @@ class CustomConvMixer(nn.Module):
                   MixerBlock(stage_in_channels[3], kernel_size, in_stage_block_type[1]),
                   MixerBlock(stage_in_channels[3], kernel_size, in_stage_block_type[2]),]*stage_blocks[3]
                 )
+        
         print(self.stem_block1)
         print(self.stage1_block)
         print(self.stem_block2)
@@ -230,9 +228,9 @@ class CustomConvMixer(nn.Module):
 
 
 if __name__ == "__main__":
-    convmixer = CustomConvMixer(block_type= ["r-p-p","r-p-p","r-p-p","r-p-p"], 
+    convmixer = CustomConvMixer(block_type= ["dw-p","dw-p","dw-p","r"], 
                                 block_repeat="homo",
-                                in_stage_block_type=["dw-p","dw-p",'r-p'], # not using
+                                in_stage_block_type=["p-p-dw","p-p-dw",'r'], # not using in homo case
                                 stage_in_channels=[96, 192, 384, 768],
                                 stage_blocks = [3,3,3,3], 
                                 patch_size = 4, 
