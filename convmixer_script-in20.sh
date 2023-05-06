@@ -3,43 +3,43 @@
 
 ### conv-type 비교 실험
 # conv
-CONFIG_NAME00="resnet18_8xb16_cifar10" 
-CONFIG_NAME01="config_convmixer_in20-(dw-p)x4-homo" 
-CONFIG_NAME02="config_convmixer_in20-(r-p)x4-homo"
+# CONFIG_NAME00="resnet18_8xb16_cifar10" 
+# CONFIG_NAME01="config_convmixer_in20-(dw-p)x4-homo" 
+# CONFIG_NAME02="config_convmixer_in20-(r-p)x4-homo"
 
-CONFIG_NAME03="config_convmixer_in20-(dw-p)x4-homo-aug"
-CONFIG_NAME04="config_convmixer_in20-(r-p)x4-homo-aug"
+# CONFIG_NAME03="config_convmixer_in20-(dw-p)x4-homo-aug"
+# CONFIG_NAME04="config_convmixer_in20-(r-p)x4-homo-aug"
 
-# CONFIG_NAME05="config_convmixer_in20-(dw-p)x4-homo-aug-300ep" # check
-# CONFIG_NAME06="config_convmixer_in20-(r-p)x4-homo-aug-300ep" # check
+# CONFIG_NAME05="config_convmixer_in20-(dw-p)x4-homo-aug-300ep" 
+# CONFIG_NAME06="config_convmixer_in20-(r-p)x4-homo-aug-300ep" 
 
-CONFIG_NAME07="config_convmixer_in20-(dw-p-p)x4-homo-aug" # check
-CONFIG_NAME08="config_convmixer_in20-(r-p-p)x4-homo-aug" # check
-CONFIG_NAME09="config_convmixer_in20-(p-p-dw)x4-homo-aug" # check
-CONFIG_NAME10="config_convmixer_in20-(p-dw-p)x4-homo-aug" # check
+CONFIG_NAME07="config_convmixer_in20-(dw-p-p)x4-homo-aug" 
+CONFIG_NAME08="config_convmixer_in20-(r-p-p)x4-homo-aug" 
+CONFIG_NAME09="config_convmixer_in20-(p-p-dw)x4-homo-aug" 
+CONFIG_NAME10="config_convmixer_in20-(p-dw-p)x4-homo-aug" 
 
-CONFIG_NAME11="config_convmixer_in20-(p-p-r)x4-homo-aug"
-# CONFIG_NAME08="config_convmixer_in20-(r-p-p)x4-homo-aug" # done
-CONFIG_NAME12="config_convmixer_in20-(p-r-p)x4-homo-aug"
-CONFIG_NAME13="config_convmixer_in20-(r)x4-homo-aug"
+# CONFIG_NAME11="config_convmixer_in20-(p-p-r)x4-homo-aug"
+# CONFIG_NAME08="config_convmixer_in20-(r-p-p)x4-homo-aug" 
+# CONFIG_NAME12="config_convmixer_in20-(p-r-p)x4-homo-aug"
+# CONFIG_NAME13="config_convmixer_in20-(r)x4-homo-aug"
 
-CONFIG_NAME14="config_convmixer_in20-(r1)x1(dw-p)x3-homo-aug"
-CONFIG_NAME15="config_convmixer_in20-(r2)x1(dw-p)x3-homo-aug"
-CONFIG_NAME16="config_convmixer_in20-(r3)x1(dw-p)x3-homo-aug"
-CONFIG_NAME17="config_convmixer_in20-(r4)x1(dw-p)x3-homo-aug"
+# CONFIG_NAME14="config_convmixer_in20-(r1)x1(dw-p)x3-homo-aug"
+# CONFIG_NAME15="config_convmixer_in20-(r2)x1(dw-p)x3-homo-aug"
+# CONFIG_NAME16="config_convmixer_in20-(r3)x1(dw-p)x3-homo-aug"
+# CONFIG_NAME17="config_convmixer_in20-(r4)x1(dw-p)x3-homo-aug"
 
-CONFIG_NAME18="config_convmixer_in20-(r-dwp-dwp)x4-inhomo-aug"
-CONFIG_NAME19="config_convmixer_in20-(dwp-r-dwp)x4-inhomo-aug"
-CONFIG_NAME20="config_convmixer_in20-(dwp-dwp-r)x4-inhomo-aug"
+# CONFIG_NAME18="config_convmixer_in20-(r-dwp-dwp)x4-inhomo-aug"
+# CONFIG_NAME19="config_convmixer_in20-(dwp-r-dwp)x4-inhomo-aug"
+# CONFIG_NAME20="config_convmixer_in20-(dwp-dwp-r)x4-inhomo-aug"
 
-CONFIG_NAME21="config_convmixer_in20-(p-dw)x4-homo-aug"
-CONFIG_NAME22="config_convmixer_in20-(ppdw-r-dwp)x4-inhomo-aug"
-CONFIG_NAME23="config_convmixer_in20-(ppdw-ppdw-r)x4-inhomo-aug"
+# CONFIG_NAME21="config_convmixer_in20-(p-dw)x4-homo-aug"
+# CONFIG_NAME22="config_convmixer_in20-(ppdw-r-dwp)x4-inhomo-aug"
+# CONFIG_NAME23="config_convmixer_in20-(ppdw-ppdw-r)x4-inhomo-aug"
 
 CONFIG_NAME24="config_convmixer_in20-((r)x2)x4-homo-aug"
-CONFIG_NAME25="config_convmixer_in20-((r-dwp-dwp)x2)x4-inhomo-aug"
-CONFIG_NAME26="config_convmixer_in20-((dwp-dwp-r)x2)x4-inhomo-aug"
-CONFIG_NAME27="config_convmixer_in20-((dwp-r-dwp)x2)x4-inhomo-aug"
+# CONFIG_NAME25="config_convmixer_in20-((r-dwp-dwp)x2)x4-inhomo-aug"
+# CONFIG_NAME26="config_convmixer_in20-((dwp-dwp-r)x2)x4-inhomo-aug"
+# CONFIG_NAME27="config_convmixer_in20-((dwp-r-dwp)x2)x4-inhomo-aug"
 
 
 
@@ -155,13 +155,13 @@ SEED=42
 # python tools/train.py ${CONFIG_FILE15} --work-dir ${WORK_DIR15} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME15}
 # python tools/train.py ${CONFIG_FILE16} --work-dir ${WORK_DIR16} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME16}
 # python tools/train.py ${CONFIG_FILE17} --work-dir ${WORK_DIR17} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME17}
-python tools/train.py ${CONFIG_FILE18} --work-dir ${WORK_DIR18} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME18}
-python tools/train.py ${CONFIG_FILE19} --work-dir ${WORK_DIR19} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME19}
-python tools/train.py ${CONFIG_FILE20} --work-dir ${WORK_DIR20} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME20}
+# python tools/train.py ${CONFIG_FILE18} --work-dir ${WORK_DIR18} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME18}
+# python tools/train.py ${CONFIG_FILE19} --work-dir ${WORK_DIR19} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME19}
+# python tools/train.py ${CONFIG_FILE20} --work-dir ${WORK_DIR20} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME20}
 # python tools/train.py ${CONFIG_FILE21} --work-dir ${WORK_DIR21} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME21}
 # python tools/train.py ${CONFIG_FILE22} --work-dir ${WORK_DIR22} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME22}
 # python tools/train.py ${CONFIG_FILE23} --work-dir ${WORK_DIR23} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME23}
-# python tools/train.py ${CONFIG_FILE24} --work-dir ${WORK_DIR21} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME21}
-python tools/train.py ${CONFIG_FILE25} --work-dir ${WORK_DIR22} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME22}
-python tools/train.py ${CONFIG_FILE26} --work-dir ${WORK_DIR23} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME23}
-python tools/train.py ${CONFIG_FILE27} --work-dir ${WORK_DIR23} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME23}
+python tools/train.py ${CONFIG_FILE24} --work-dir ${WORK_DIR24} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME24}
+# python tools/train.py ${CONFIG_FILE25} --work-dir ${WORK_DIR25} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME25}
+# python tools/train.py ${CONFIG_FILE26} --work-dir ${WORK_DIR26} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME26}
+# python tools/train.py ${CONFIG_FILE27} --work-dir ${WORK_DIR27} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME27}

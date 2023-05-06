@@ -137,7 +137,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='AB_test', # check
+                                           project='decomp', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None

@@ -150,7 +150,7 @@ model = dict(
                   block_type = ["r", "r", "r", "r"],
                   block_repeat = "homo",
                   stage_in_channels = [96, 192, 384, 768],
-                  stage_blocks = [3,3,3,3],
+                  stage_blocks = [6,6,6,6],
                   patch_size = 4,
                   kernel_size = 3,
                   ),

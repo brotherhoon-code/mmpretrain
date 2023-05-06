@@ -67,6 +67,8 @@ from .custom_gcnet2 import CustomGCNet2
 
 from .custom_convmixer import CustomConvMixer
 
+from .ConvMixer_v1 import ConvMixer_v1
+
 
 
 __all__ = [
@@ -143,5 +145,7 @@ __all__ = [
     
     'CustomResNet3',
     
-    'CustomConvMixer'
+    'CustomConvMixer',
+    
+    'ConvMixer_v1'
     ]

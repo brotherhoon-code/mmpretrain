@@ -137,7 +137,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='AB_test', # check
+                                           project='decomp',
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -147,10 +147,10 @@ randomness = dict(seed=None, deterministic=True)
 model = dict(
     type='ImageClassifier',
     backbone=dict(type='CustomConvMixer',
-                  block_type = ["dw-p", "dw-p", "dw-p", "dw-p"],
+                  block_type = ["r", "r", "r", "r"],
                   block_repeat = "homo",
                   stage_in_channels = [96, 192, 384, 768],
-                  stage_blocks = [3,3,3,3],
+                  stage_blocks = [1,1,1,1],
                   patch_size = 4,
                   kernel_size = 3,
                   ),

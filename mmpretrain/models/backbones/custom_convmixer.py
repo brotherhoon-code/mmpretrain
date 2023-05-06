@@ -7,6 +7,18 @@ from einops.layers.torch import Rearrange, Reduce
 from ..builder import BACKBONES
 
 
+class ResidualBlock(nn.Module):
+    def __init__(self,
+                 block:nn.Module,
+                 skip_conn=True):
+        super(ResidualBlock, self).__init__()
+        self.block = block
+        self.skip_conn = skip_conn
+        
+    def forward(self, x):
+        return self.block(x)+x
+
+
 class PatchEmbedBlock(nn.Module):
     def __init__(self, 
                  in_channels:int,
@@ -78,52 +90,75 @@ class MixerBlock(nn.Module):
         self.dim = dim
         self.kernel_size = kernel_size
         self.block_type = block_type
+
         if block_type == "dw-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block = ChannelMixBlock(dim) # p
+
         elif block_type == "p-dw":
-            self.channel_mix_block = ChannelMixBlock(dim) # p
+            # self.channel_mix_block = ChannelMixBlock(dim) # p
+            self.channel_mix_block = nn.Conv2d(dim, dim, 1, bias=False) # BSCond
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
+
         elif block_type == "dw-p-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+
         elif block_type == "p-p-dw":
-            self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+            # self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+            self.channel_mix_block = nn.Sequential(nn.Conv2d(dim, dim//4, 1, bias=False), 
+                                                   nn.Conv2d(dim//4, dim, 1, bias=False)) # Subspace BSConv
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
+
         elif block_type == "p-dw-p":
             self.channel_mix_block1 = ChannelMixBlock(dim) # p
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block2 = nn.Conv2d(dim,dim,1) # p
+
         elif block_type == "r-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block = ChannelMixBlock(dim) # p
+
         elif block_type == "r-p-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+
         elif block_type == "p-p-r":
             self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
+
         elif block_type == "p-r-p":
             self.channel_mix_block1 = ChannelMixBlock(dim) # p
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block2 = nn.Conv2d(dim,dim,1) # p
-        
+
         elif block_type == "r":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block = nn.Sequential()
+
     
     def forward(self, x):
         if self.block_type.split("-")[0] != 'p': # dw-p, r, r-p-p, dw-p-p
-            identity = x
-            x = self.spatial_mix_block(x) + identity
+            # identity = x
+            x = self.spatial_mix_block(x) + x
             x = self.channel_mix_block(x)
+            if len(self.block_type) == 1: # r case
+                return x
+            # x += identity
+            
         elif self.block_type.split("-")[0] == 'p' and self.block_type.split("-")[-1] != 'p': # p-p-dw, p-p-r, p-dw
-            identity = self.channel_mix_block(x)
-            x = self.spatial_mix_block(identity) + identity
+            # identity = x
+            x = self.channel_mix_block(x)
+            x = self.spatial_mix_block(x) + x
+            # x += identity
+            
         elif self.block_type.split("-")[0] == 'p' and self.block_type.split("-")[-1] == 'p': # p-dw-p, p-r-p
+            # identity = x
             x = self.channel_mix_block1(x)
             x = self.spatial_mix_block(x) + x
             x = self.channel_mix_block2(x)
+            # x += identity
+            
         else:
             raise ValueError(f"block_type error: {self.block_type} not in case")
         return x

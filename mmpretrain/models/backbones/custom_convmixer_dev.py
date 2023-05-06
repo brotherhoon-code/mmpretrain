@@ -4,7 +4,16 @@ from torchsummary import summary
 import torch.nn.functional as F
 from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
-
+class ResidualBlock(nn.Module):
+    def __init__(self,
+                 block:nn.Module,
+                 skip_conn=True):
+        super(ResidualBlock, self).__init__()
+        self.block = block
+        self.skip_conn = skip_conn
+        
+    def forward(self, x):
+        return self.block(x)+x
 
 class PatchEmbedBlock(nn.Module):
     def __init__(self, 
@@ -79,8 +88,10 @@ class MixerBlock(nn.Module):
         if block_type == "dw-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block = ChannelMixBlock(dim) # p
+            # nn.Conv2d(dim, dim, 1, 1, )
         elif block_type == "p-dw":
-            self.channel_mix_block = ChannelMixBlock(dim) # p
+            # self.channel_mix_block = ChannelMixBlock(dim) # p
+            self.channel_mix_block = nn.Conv2d(dim, dim, 1, bias=False)
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
         elif block_type == "dw-p-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
@@ -112,16 +123,21 @@ class MixerBlock(nn.Module):
     
     def forward(self, x):
         if self.block_type.split("-")[0] != 'p': # dw-p, r, r-p-p, dw-p-p
-            identity = x
+            # identity = x
             x = self.spatial_mix_block(x) + identity
             x = self.channel_mix_block(x)
+            # x += identity
         elif self.block_type.split("-")[0] == 'p' and self.block_type.split("-")[-1] != 'p': # p-p-dw, p-p-r, p-dw
+            # identity = x
             identity = self.channel_mix_block(x)
-            x = self.spatial_mix_block(identity) + identity
+            x = self.spatial_mix_block(x) + x
+            # x += identity
         elif self.block_type.split("-")[0] == 'p' and self.block_type.split("-")[-1] == 'p': # p-dw-p, p-r-p
+            # identity = x
             x = self.channel_mix_block1(x)
             x = self.spatial_mix_block(x) + x
             x = self.channel_mix_block2(x)
+            # x += identity
         else:
             raise ValueError(f"block_type error: {self.block_type} not in case")
         return x
@@ -229,10 +245,10 @@ class CustomConvMixer(nn.Module):
 
 if __name__ == "__main__":
     convmixer = CustomConvMixer(block_type= ["dw-p","dw-p","dw-p","r"], 
-                                block_repeat="homo",
-                                in_stage_block_type=["p-p-dw","p-p-dw",'r'], # not using in homo case
+                                block_repeat="inhomo",
+                                in_stage_block_type=["dw-p","dw-p",'r'], # not using in homo case
                                 stage_in_channels=[96, 192, 384, 768],
-                                stage_blocks = [3,3,3,3], 
+                                stage_blocks = [6,6,6,6], 
                                 patch_size = 4, 
                                 kernel_size = 3)
     

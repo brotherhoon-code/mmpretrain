@@ -1,5 +1,7 @@
 # dataset settings
 dataset_type = 'ImageNet'
+BATCH_SIZE = 64
+
 data_preprocessor = dict(
     num_classes=20,
     # RGB format normalization parameters
@@ -53,7 +55,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=256,
+    batch_size=BATCH_SIZE,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -65,7 +67,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=256,
+    batch_size=BATCH_SIZE,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -85,18 +87,10 @@ test_evaluator = val_evaluator
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
-        lr= 0.001,
+        lr= 5e-4*BATCH_SIZE*1/512, # 0.045789 
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
 )
 
 # learning policy
@@ -113,11 +107,11 @@ param_scheduler = [
     dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
 ]
 
-train_cfg = dict(by_epoch=True, max_epochs=100, val_interval=10)
+train_cfg = dict(by_epoch=True, max_epochs=300, val_interval=10)
 val_cfg = dict()
 test_cfg = dict()
 
-auto_scale_lr = dict(base_batch_size=256)
+auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
 default_scope = 'mmpretrain'
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
@@ -137,7 +131,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='AB_test', # check
+                                           project='architecture', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -146,13 +140,11 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomConvMixer',
-                  block_type = ["dw-p", "dw-p", "dw-p", "dw-p"],
-                  block_repeat = "homo",
-                  stage_in_channels = [96, 192, 384, 768],
-                  stage_blocks = [3,3,3,3],
-                  patch_size = 4,
-                  kernel_size = 3,
+    backbone=dict(type='ConvMixer',
+                  arch='768/32',
+                  in_channels=3,
+                  norm_cfg=dict(type='BN'),
+                  act_cfg=dict(type='GELU'),
                   ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(

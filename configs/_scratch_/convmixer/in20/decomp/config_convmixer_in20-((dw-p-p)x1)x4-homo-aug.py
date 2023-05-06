@@ -113,7 +113,7 @@ param_scheduler = [
     dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
 ]
 
-train_cfg = dict(by_epoch=True, max_epochs=300, val_interval=10)
+train_cfg = dict(by_epoch=True, max_epochs=100, val_interval=10)
 val_cfg = dict()
 test_cfg = dict()
 
@@ -137,7 +137,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='regular_vs_depthwise',
+                                           project='decomp', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -147,10 +147,10 @@ randomness = dict(seed=None, deterministic=True)
 model = dict(
     type='ImageClassifier',
     backbone=dict(type='CustomConvMixer',
-                  block_type = ["dw-p", "dw-p", "dw-p", "dw-p"],
+                  block_type = ["dw-p-p", "dw-p-p", "dw-p-p", "dw-p-p"],
                   block_repeat = "homo",
                   stage_in_channels = [96, 192, 384, 768],
-                  stage_blocks = [3,3,3,3],
+                  stage_blocks = [1,1,1,1],
                   patch_size = 4,
                   kernel_size = 3,
                   ),
