@@ -4,6 +4,9 @@ from torchsummary import summary
 import torch.nn.functional as F
 from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
+from ...builder import BACKBONES
+
+
 class ResidualBlock(nn.Module):
     def __init__(self,
                  block:nn.Module,
@@ -14,6 +17,7 @@ class ResidualBlock(nn.Module):
         
     def forward(self, x):
         return self.block(x)+x
+
 
 class PatchEmbedBlock(nn.Module):
     def __init__(self, 
@@ -34,6 +38,7 @@ class PatchEmbedBlock(nn.Module):
         x = self.active_func(x)
         x = self.bn_layer(x)
         return x # b dim h/patch_size w/patch_size
+
 
 class SpatialMixBlock(nn.Module):
     def __init__(self, 
@@ -58,6 +63,7 @@ class SpatialMixBlock(nn.Module):
         x = self.active_func(x)
         x = self.bn_layer(x)
         return x
+
 
 class ChannelMixBlock(nn.Module):
     def __init__(self, 
@@ -84,65 +90,81 @@ class MixerBlock(nn.Module):
         self.dim = dim
         self.kernel_size = kernel_size
         self.block_type = block_type
-        
+
         if block_type == "dw-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block = ChannelMixBlock(dim) # p
-            # nn.Conv2d(dim, dim, 1, 1, )
+
         elif block_type == "p-dw":
             # self.channel_mix_block = ChannelMixBlock(dim) # p
-            self.channel_mix_block = nn.Conv2d(dim, dim, 1, bias=False)
+            self.channel_mix_block = nn.Conv2d(dim, dim, 1, bias=False) # BSCond
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
+
         elif block_type == "dw-p-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+
         elif block_type == "p-p-dw":
-            self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+            # self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+            self.channel_mix_block = nn.Sequential(nn.Conv2d(dim, dim//4, 1, bias=False), 
+                                                   nn.Conv2d(dim//4, dim, 1, bias=False)) # Subspace BSConv
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
+
         elif block_type == "p-dw-p":
             self.channel_mix_block1 = ChannelMixBlock(dim) # p
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, dim) # dw
             self.channel_mix_block2 = nn.Conv2d(dim,dim,1) # p
+
         elif block_type == "r-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block = ChannelMixBlock(dim) # p
+
         elif block_type == "r-p-p":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
+
         elif block_type == "p-p-r":
             self.channel_mix_block = nn.Sequential(ChannelMixBlock(dim), ChannelMixBlock(dim)) # p, p
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
+
         elif block_type == "p-r-p":
             self.channel_mix_block1 = ChannelMixBlock(dim) # p
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block2 = nn.Conv2d(dim,dim,1) # p
-        
+
         elif block_type == "r":
             self.spatial_mix_block = SpatialMixBlock(dim, kernel_size, 1) # r
             self.channel_mix_block = nn.Sequential()
+
     
     def forward(self, x):
         if self.block_type.split("-")[0] != 'p': # dw-p, r, r-p-p, dw-p-p
             # identity = x
-            x = self.spatial_mix_block(x) + identity
+            x = self.spatial_mix_block(x) + x
             x = self.channel_mix_block(x)
+            if len(self.block_type) == 1: # r case
+                return x
             # x += identity
+            
         elif self.block_type.split("-")[0] == 'p' and self.block_type.split("-")[-1] != 'p': # p-p-dw, p-p-r, p-dw
             # identity = x
-            identity = self.channel_mix_block(x)
+            x = self.channel_mix_block(x)
             x = self.spatial_mix_block(x) + x
             # x += identity
+            
         elif self.block_type.split("-")[0] == 'p' and self.block_type.split("-")[-1] == 'p': # p-dw-p, p-r-p
             # identity = x
             x = self.channel_mix_block1(x)
             x = self.spatial_mix_block(x) + x
             x = self.channel_mix_block2(x)
             # x += identity
+            
         else:
             raise ValueError(f"block_type error: {self.block_type} not in case")
         return x
 
 
+@BACKBONES.register_module()
 class CustomConvMixer(nn.Module):
     def __init__(self, 
                  block_type=["dw-p", "dw-p", "dw-p", "dw-p"], # homo case
@@ -211,7 +233,6 @@ class CustomConvMixer(nn.Module):
                   MixerBlock(stage_in_channels[3], kernel_size, in_stage_block_type[1]),
                   MixerBlock(stage_in_channels[3], kernel_size, in_stage_block_type[2]),]*stage_blocks[3]
                 )
-        
         print(self.stem_block1)
         print(self.stage1_block)
         print(self.stem_block2)
@@ -244,11 +265,11 @@ class CustomConvMixer(nn.Module):
 
 
 if __name__ == "__main__":
-    convmixer = CustomConvMixer(block_type= ["dw-p","dw-p","dw-p","r"], 
-                                block_repeat="inhomo",
-                                in_stage_block_type=["dw-p","dw-p",'r'], # not using in homo case
+    convmixer = CustomConvMixer(block_type= ["r-p-p","r-p-p","r-p-p","r-p-p"], 
+                                block_repeat="homo",
+                                in_stage_block_type=["dw-p","dw-p",'r-p'], # not using
                                 stage_in_channels=[96, 192, 384, 768],
-                                stage_blocks = [6,6,6,6], 
+                                stage_blocks = [3,3,3,3], 
                                 patch_size = 4, 
                                 kernel_size = 3)
     

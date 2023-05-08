@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from typing import Any, Callable, List, Optional, Type, Union
-# from ..builder import BACKBONES
+from ..builder import BACKBONES
 
 
 '''
@@ -149,8 +149,8 @@ class BottleneckResBlock(nn.Module):
         return outs
 
 
-# @BACKBONES.register_module()
-class CustomResNet3(nn.Module):
+@BACKBONES.register_module()
+class CustomResNet(nn.Module):
     def __init__(self, 
                  block_type:str = "BottleneckResBlock", 
                  stem_type:str = "Resnet", 
@@ -175,6 +175,7 @@ class CustomResNet3(nn.Module):
         self.stage3 = self._make_stage(block, stage_blocks[2], strides[2], stage_out_channels[1], feature_channels[2], stage_out_channels[2], act_func, 2, **kwargs)
         self.stage4 = self._make_stage(block, stage_blocks[3], strides[3], stage_out_channels[2], feature_channels[3], stage_out_channels[3], act_func, 3, **kwargs)
 
+        print(self.stem)
         print(self.stage1)
         print(self.stage2)
         print(self.stage3)
@@ -194,7 +195,6 @@ class CustomResNet3(nn.Module):
         return tuple(outs)
 
 
-    # 이 함수에서 모든 keyword 처리
     @staticmethod
     def _make_stage(block:Union[BottleneckResBlock, IBttleneckResBlock],
                     n_blocks:int,
@@ -213,15 +213,16 @@ class CustomResNet3(nn.Module):
         out_channels,
         stride,
         '''
+        if 'isDepthwise' in kwargs:
+            isDepthwise = kwargs.get('isDepthwise', False)[stage_order] # 생성하는 스테이지의 DW여부를 확인한다.
+        else:
+            isDepthwise = False
         
-        isDepthwise = kwargs.get('isDepthwise', False)[stage_order] # 생성하는 스테이지의 DW여부를 확인한다.
-        
-        n_repeat = n_blocks-2 # total blocks에서 sub-block_last, sub-block_last을 제외한 sub블록의 반복 횟수
-        
-        blocks.append(block(in_channels, feature_channels, out_channels, stride, act_func, dw=isDepthwise)) # first sub-block
+        n_repeat = n_blocks-2
         current_channels = out_channels
+        blocks.append(block(in_channels, feature_channels, out_channels, stride, act_func, dw=isDepthwise)) # first sub-block
         
-        for stage_order in range(n_repeat):
+        for _ in range(n_repeat):
             blocks.append(block(current_channels, feature_channels, out_channels, 1, act_func, dw=isDepthwise))
             current_channels = out_channels
         
@@ -229,20 +230,27 @@ class CustomResNet3(nn.Module):
         
         return nn.Sequential(*blocks)
 
-# R R R R
-# DW DW R R
-# R R DW DW
+# resnet50
+# stem_channels = 64,
+# stage_blocks = [3, 4, 6, 3],
+# feature_channels = [64, 128, 256, 512],
+# stage_out_channels = [256, 512, 1024, 2048],
 
+# convnext ratio
+# stem_channels = 96,
+# stage_blocks = [3, 3, 9, 3],
+# feature_channels = [96, 192, 384, 768],
+# stage_out_channels = [192, 384, 768, 3072],
 
 if __name__ == "__main__":
     m = CustomResNet3(block_type = "BottleneckResBlock",
                       stem_type = "Resnet",
                       stem_channels = 64,
-                      stage_blocks = [3, 3, 3, 3],
+                      stage_blocks = [3, 4, 6, 3],
                       feature_channels = [64, 128, 256, 512],
                       stage_out_channels = [256, 512, 1024, 2048],
                       strides = [1, 2, 2, 2],
                       act_func="ReLU",
-                      isDepthwise=[True, False, True, False])
+                      isDepthwise=[False,False,False,False])
     
-    # summary(m, (3,224,224), device="cpu", batch_size=1)
+    summary(m, (3,224,224), device="cpu", batch_size=1)

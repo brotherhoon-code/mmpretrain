@@ -55,19 +55,8 @@ from .vision_transformer import VisionTransformer
 from .xcit import XCiT
 
 from .carrot import Carrot
-from .official_resnet import CustomResNet2
-from .custom_resnet3 import CustomResNet3
-
-from .custom_seresnet import CustomSEResNet
-from .custom_cbam import CustomCBAM
-from .custom_nonlocal_resnet import CustomNonLocalResNet
-from .custom_nonlocal_resnet2 import CustomNonLocalResNet2
-from .custom_gcnet import CustomGCNet
-from .custom_gcnet2 import CustomGCNet2
-
+from .custom_resnet import CustomResNet
 from .custom_convmixer import CustomConvMixer
-
-from .ConvMixer_v1 import ConvMixer_v1
 
 
 
@@ -135,17 +124,7 @@ __all__ = [
     'XCiT',
     
     'Carrot',
-    'CustomResNet2',
-    'CustomSEResNet',
-    'CustomCBAM',
-    'CustomNonLocalResNet',
-    'CustomNonLocalResNet2',
-    'CustomGCNet',
-    'CustomGCNet2',
-    
-    'CustomResNet3',
-    
+    'CustomResNet',
     'CustomConvMixer',
     
-    'ConvMixer_v1'
     ]

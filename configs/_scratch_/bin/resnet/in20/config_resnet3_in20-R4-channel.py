@@ -1,7 +1,5 @@
 # dataset settings
 dataset_type = 'ImageNet'
-BATCH_SIZE = 32
-
 data_preprocessor = dict(
     num_classes=20,
     # RGB format normalization parameters
@@ -11,51 +9,22 @@ data_preprocessor = dict(
     to_rgb=True,
 )
 
-bgr_mean = data_preprocessor['mean'][::-1]
-bgr_std = data_preprocessor['std'][::-1]
-
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='RandomResizedCrop',
-        scale=224,
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='RandomResizedCrop', scale=224),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(
-        type='RandAugment',
-        policies='timm_increasing',
-        num_policies=2,
-        total_level=10,
-        magnitude_level=9,
-        magnitude_std=0.5,
-        hparams=dict(
-            pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')),
-    dict(
-        type='RandomErasing',
-        erase_prob=0.25,
-        mode='rand',
-        min_area_ratio=0.02,
-        max_area_ratio=1 / 3,
-        fill_color=bgr_mean,
-        fill_std=bgr_std),
     dict(type='PackInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='ResizeEdge',
-        scale=256,
-        edge='short',
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='ResizeEdge', scale=256, edge='short'),
     dict(type='CenterCrop', crop_size=224),
     dict(type='PackInputs'),
 ]
 
 train_dataloader = dict(
-    batch_size=BATCH_SIZE,
+    batch_size=32,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -67,7 +36,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=BATCH_SIZE,
+    batch_size=32,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -83,35 +52,17 @@ val_evaluator = dict(type='Accuracy', topk=(1, 5))
 test_dataloader = val_dataloader
 test_evaluator = val_evaluator
 
-# lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW',
-        lr= 5e-4*BATCH_SIZE*1/512, # 0.045789 
-        weight_decay=0.05,
-        eps=1e-8,
-        betas=(0.9, 0.999)),
-)
+    optimizer=dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001))
 
-# learning policy
-param_scheduler = [
-    # warm up learning rate scheduler
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=20,
-        # update by iter
-        convert_to_iter_based=True),
-    # main learning rate scheduler
-    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
-]
+param_scheduler = dict(
+    type='MultiStepLR', by_epoch=True, milestones=[30, 60, 90], gamma=0.1)
 
 train_cfg = dict(by_epoch=True, max_epochs=100, val_interval=10)
 val_cfg = dict()
 test_cfg = dict()
 
-auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
+auto_scale_lr = dict(base_batch_size=256)
 default_scope = 'mmpretrain'
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
@@ -130,8 +81,7 @@ visualizer = dict(type='UniversalVisualizer',
                   vis_backends=[
                       dict(
                           type='WandbVisBackend', 
-                          init_kwargs=dict(entity='brotherhoon88',
-                                           project='architecture', # check
+                          init_kwargs=dict(project='in20', 
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -140,23 +90,21 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='ConvMixer_v1',
-                  dim=768,
-                  depth=32,
-                  patch_size=7,
-                  kernel_size=7
+    backbone=dict(type='CustomResNet', 
+                  block_type = "BottleneckResBlock",
+                  stem_type = "Resnet",
+                  stem_channels = 96,
+                  stage_blocks = [3, 4, 6, 3], 
+                  feature_channels = [96, 192, 384, 768],
+                  stage_out_channels = [192, 384, 768, 3072],
+                  strides = [1,2,2,2],
                   ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=20,
-        in_channels=768,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)),
-    train_cfg=dict(augments=[
-        dict(type='Mixup', alpha=0.8),
-        dict(type='CutMix', alpha=1.0)
-    ]),
-    )
+        in_channels=3072,
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
 
 launcher = 'none'
 
