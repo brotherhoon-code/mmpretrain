@@ -56,6 +56,13 @@ from .xcit import XCiT
 
 from .carrot import Carrot
 from .custom_resnet import CustomResNet
+from .custom_resnet_swinlike import SwinLikeResNet
+from .custom_resnet_swinlike2 import SwinLikeResNet2
+from .custom_resnet_swinlike3 import SwinLikeResNet3
+
+from .custom_exp1 import DWResNet
+
+
 from .custom_convmixer import CustomConvMixer
 
 
@@ -124,7 +131,12 @@ __all__ = [
     'XCiT',
     
     'Carrot',
+    
     'CustomResNet',
-    'CustomConvMixer',
+    'DWResNet',
+    
+    'SwinLikeResNet',
+    'SwinLikeResNet2',
+    'SwinLikeResNet3',
     
     ]

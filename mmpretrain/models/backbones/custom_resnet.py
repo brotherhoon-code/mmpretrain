@@ -8,15 +8,6 @@ from typing import Any, Callable, List, Optional, Type, Union
 from ..builder import BACKBONES
 
 
-'''
-CustomResNet3
-    def make_stage(block_type, num_blocks, downsample, in_channels, out_channels)
-    
-BottleneckResBlock
-
-StemBlock
-
-'''
 def getActFunc(type:str="ReLU"):
     function = None
     if type == "ReLU":
@@ -34,7 +25,7 @@ class ResnetStemBlock(nn.Module):
                  out_channels,
                  deep_stem=True,
                  act_func = "ReLU",
-                 **kwrags):
+                 **kwargs):
         super().__init__()
         stem = []
         if deep_stem:
@@ -90,8 +81,6 @@ class IBttleneckResBlock(nn.Module):
         
         self.active_func = getActFunc(act_func)
         
-        
-        
     def forward(self, x):
         return x
 
@@ -140,7 +129,6 @@ class BottleneckResBlock(nn.Module):
         
         self.active_func = getActFunc(act_func)
         
-        
     def forward(self, x):
         identity = self.skip_conn(x)
         outs = self.block(x)
@@ -174,12 +162,6 @@ class CustomResNet(nn.Module):
         self.stage2 = self._make_stage(block, stage_blocks[1], strides[1], stage_out_channels[0], feature_channels[1], stage_out_channels[1], act_func, 1, **kwargs)
         self.stage3 = self._make_stage(block, stage_blocks[2], strides[2], stage_out_channels[1], feature_channels[2], stage_out_channels[2], act_func, 2, **kwargs)
         self.stage4 = self._make_stage(block, stage_blocks[3], strides[3], stage_out_channels[2], feature_channels[3], stage_out_channels[3], act_func, 3, **kwargs)
-
-        print(self.stem)
-        print(self.stage1)
-        print(self.stage2)
-        print(self.stage3)
-        print(self.stage4)
     
     def forward(self, x):
         outs = []
@@ -194,7 +176,6 @@ class CustomResNet(nn.Module):
         outs.append(out)
         return tuple(outs)
 
-
     @staticmethod
     def _make_stage(block:Union[BottleneckResBlock, IBttleneckResBlock],
                     n_blocks:int,
@@ -207,12 +188,7 @@ class CustomResNet(nn.Module):
                     **kwargs):
         blocks = []
         current_channels = None
-        ''' 
-        in_channels,
-        inter_channels,
-        out_channels,
-        stride,
-        '''
+
         if 'isDepthwise' in kwargs:
             isDepthwise = kwargs.get('isDepthwise', False)[stage_order] # 생성하는 스테이지의 DW여부를 확인한다.
         else:
@@ -230,20 +206,9 @@ class CustomResNet(nn.Module):
         
         return nn.Sequential(*blocks)
 
-# resnet50
-# stem_channels = 64,
-# stage_blocks = [3, 4, 6, 3],
-# feature_channels = [64, 128, 256, 512],
-# stage_out_channels = [256, 512, 1024, 2048],
-
-# convnext ratio
-# stem_channels = 96,
-# stage_blocks = [3, 3, 9, 3],
-# feature_channels = [96, 192, 384, 768],
-# stage_out_channels = [192, 384, 768, 3072],
 
 if __name__ == "__main__":
-    m = CustomResNet3(block_type = "BottleneckResBlock",
+    m = CustomResNet(block_type = "BottleneckResBlock",
                       stem_type = "Resnet",
                       stem_channels = 64,
                       stage_blocks = [3, 4, 6, 3],

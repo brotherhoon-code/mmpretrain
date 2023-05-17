@@ -142,27 +142,39 @@ load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=True)
 
+# model = dict(
+#     type='ImageClassifier',
+#     backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1),
+#     head=dict(
+#         type='LinearClsHead',
+#         num_classes=20,
+#         in_channels=768,
+#         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)),
+#     train_cfg=dict(augments=[
+#         dict(type='Mixup', alpha=0.8),
+#         dict(type='CutMix', alpha=1.0)
+#     ]),
+#     )
+
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomResNet', 
-                  block_type = "BottleneckResBlock",
-                  stem_type = "Resnet",
-                  stem_channels = 64,
-                  stage_blocks = [3, 4, 6, 3], 
-                  feature_channels = [64, 128, 256, 512], # [64, 128, 256, 512], [96, 192, 384, 768]
-                  stage_out_channels = [256, 512, 1024, 2048], # [256, 512, 1024, 2048], [192, 384, 768, 3072]
-                  strides = [1,2,2,2]),
-    neck=dict(type='GlobalAveragePooling'),
+    backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1),
     head=dict(
         type='LinearClsHead',
         num_classes=20,
-        in_channels=2048, # 2048, 3072
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)),
+        in_channels=768,
+        loss=dict(
+            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
+        init_cfg=None,
+    ),
+    init_cfg=dict(
+        type='TruncNormal', layer=['Conv2d', 'Linear'], std=.02, bias=0.),
     train_cfg=dict(augments=[
         dict(type='Mixup', alpha=0.8),
-        dict(type='CutMix', alpha=1.0)
+        dict(type='CutMix', alpha=1.0),
     ]),
-    )
+)
+
 
 launcher = 'none'
 

@@ -144,19 +144,19 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomResNet', 
+    backbone=dict(type='DWResNet', 
                   block_type = "BottleneckResBlock",
-                  stem_type = "Resnet",
-                  stem_channels = 64,
-                  stage_blocks = [3, 4, 6, 3], 
-                  feature_channels = [64, 128, 256, 512], # [64, 128, 256, 512], [96, 192, 384, 768]
-                  stage_out_channels = [256, 512, 1024, 2048], # [256, 512, 1024, 2048], [192, 384, 768, 3072]
-                  strides = [1,2,2,2]),
+                  stem_channels = 96,
+                  stage_blocks = [3, 3, 9, 3], 
+                  feature_channels = [96, 192, 384, 768],
+                  stage_out_channels = [96, 192, 384, 768],
+                  strides = [1,1,1,1],
+                  act_func = "GELU"),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=20,
-        in_channels=2048, # 2048, 3072
+        in_channels=768,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)),
     train_cfg=dict(augments=[
         dict(type='Mixup', alpha=0.8),
