@@ -59,12 +59,9 @@ from .custom_resnet import CustomResNet
 from .custom_resnet_swinlike import SwinLikeResNet
 from .custom_resnet_swinlike2 import SwinLikeResNet2
 from .custom_resnet_swinlike3 import SwinLikeResNet3
+from .custom_dynamic_resnet import DynamicResNet
 
 from .custom_exp1 import DWResNet
-
-
-from .custom_convmixer import CustomConvMixer
-
 
 
 __all__ = [
@@ -139,4 +136,5 @@ __all__ = [
     'SwinLikeResNet2',
     'SwinLikeResNet3',
     
+    'DynamicResNet'
     ]
