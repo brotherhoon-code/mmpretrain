@@ -144,14 +144,15 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='DWResNet', 
-                  block_type = "BottleneckResBlock",
+    backbone=dict(type='DynamicDecompResNet', 
                   stem_channels = 96,
-                  stage_blocks = [3, 3, 9, 3], 
-                  feature_channels = [96, 192, 384, 768],
-                  stage_out_channels = [96, 192, 384, 768],
+                  stage_blocks = [2,2,6,2], 
+                  feature_channels = [96,192,384,768],
+                  stage_out_channels = [96,192,384,768],
                   strides = [1,1,1,1],
-                  act_func = "GELU"),
+                  act_func = "GELU",
+                  dw = [False, False, False, False],
+                  dynamic=[False, False, True, False]),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',

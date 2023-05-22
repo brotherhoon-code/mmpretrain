@@ -20,11 +20,14 @@ class pooling_module(nn.Module):
             self.pooling_list.append(layer2)
     
     def forward(self, x):
+        # 결정론적 알고리즘 비활성화
+        torch.use_deterministic_algorithms(True) # 무슨 역할을 하는가?
         outs = []
         for layer in self.pooling_list:
             out = layer(x)
             outs.append(out)
         x = torch.cat(outs, dim=1)
+        torch.use_deterministic_algorithms(False)
         return x
         
         
@@ -183,8 +186,6 @@ def count_parameters(model:nn.Module):
 
 if __name__ == "__main__":
     input = torch.randn((128, 96, 52, 52))
-    # m = attention2d(in_channels=96, ratio=0.25, K=4, temperature=34, init_weight=True)
-    # print(f"{m(input).shape}") # 128, 4
     
     m = Dynamic_conv2d(in_channels=96,
                        out_channels=96,
@@ -195,18 +196,3 @@ if __name__ == "__main__":
                        pool_mode="avg")
     print(count_parameters(m), "params")
     print(m(input).shape)
-    
-    
-    
-# torch.Size([128, 96, 1, 1])
-# torch.Size([128, 25, 1, 1])
-# torch.Size([128, 4, 1, 1])
-# torch.Size([128, 4])
-# torch.Size([128, 4]
-
-
-# torch.Size([128, 192, 1, 1])
-# torch.Size([128, 49, 1, 1])
-# torch.Size([128, 4, 1, 1])
-# torch.Size([128, 4])
-# torch.Size([128, 4])

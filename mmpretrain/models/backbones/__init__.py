@@ -60,8 +60,8 @@ from .custom_resnet_swinlike import SwinLikeResNet
 from .custom_resnet_swinlike2 import SwinLikeResNet2
 from .custom_resnet_swinlike3 import SwinLikeResNet3
 from .custom_dynamic_resnet import DynamicResNet
-
-from .custom_exp1 import DWResNet
+from .custom_dynamic_resnet_pool_mix import DynamicResNetPoolMix
+from .custom_dynamic_decomp_resnet import DynamicDecompResNet
 
 
 __all__ = [
@@ -130,11 +130,12 @@ __all__ = [
     'Carrot',
     
     'CustomResNet',
-    'DWResNet',
     
     'SwinLikeResNet',
     'SwinLikeResNet2',
     'SwinLikeResNet3',
     
-    'DynamicResNet'
+    'DynamicResNet',
+    'DynamicResNetPoolMix',
+    'DynamicDecompResNet'
     ]

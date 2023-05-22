@@ -1,13 +1,13 @@
 #!/bin/sh
 
-CONFIG_NAME00="config--dynamic_resnet_s1" 
-CONFIG_NAME01="config--dynamic_resnet_s2"
-CONFIG_NAME02="config--dynamic_resnet_s3"
-CONFIG_NAME03="config--exp1"
-CONFIG_NAME04="config--resnet-origin"
-CONFIG_NAME05="config--swinlike_resnet2"
-CONFIG_NAME06="config--swinlike_resnet3"
-CONFIG_NAME07="config--dynamic_resnet1"
+CONFIG_NAME00="config--dynamic_decomp_resnet_s1" 
+CONFIG_NAME01="config--dynamic_decomp_resnet_s2"
+CONFIG_NAME02="config--dynamic_decomp_resnet_s3"
+CONFIG_NAME03="config--dynamic_decomp_resnet_s4"
+CONFIG_NAME04="config--dynamic_resnet_pool_mix_s1"
+CONFIG_NAME05="config--dynamic_resnet_pool_mix_s2"
+CONFIG_NAME06="config--dynamic_resnet_pool_mix_s3"
+CONFIG_NAME07="config--dynamic_resnet_pool_mix_s4"
 CONFIG_NAME08="config--dynamic_resnet2"
 
 
@@ -50,7 +50,7 @@ SEED=42
 python tools/train.py ${CONFIG_FILE00} --work-dir ${WORK_DIR00} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME00}
 python tools/train.py ${CONFIG_FILE01} --work-dir ${WORK_DIR01} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME01}
 python tools/train.py ${CONFIG_FILE02} --work-dir ${WORK_DIR02} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME02}
-# python tools/train.py ${CONFIG_FILE03} --work-dir ${WORK_DIR03} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME03}
+python tools/train.py ${CONFIG_FILE03} --work-dir ${WORK_DIR03} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME03}
 # python tools/train.py ${CONFIG_FILE04} --work-dir ${WORK_DIR04} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME04}
 # python tools/train.py ${CONFIG_FILE05} --work-dir ${WORK_DIR05} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME05}
 # python tools/train.py ${CONFIG_FILE06} --work-dir ${WORK_DIR06} --cfg-options randomness.seed=${SEED} visualizer.vis_backends.0.init_kwargs.name=${EXP_NAME06}

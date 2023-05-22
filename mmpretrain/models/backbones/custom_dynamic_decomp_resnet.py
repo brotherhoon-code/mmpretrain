@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from typing import Any, Callable, List, Optional, Type, Union
 from ..builder import BACKBONES
-from mmpretrain.models.backbones.custom_modules.custom_dynamic_conv import Dynamic_conv2d
+from mmpretrain.models.backbones.custom_modules.dynamic_conv_decomp import conv_dy
 
 
 def getActFunc(type: str = "ReLU"):
@@ -88,59 +88,48 @@ class ResBlock(nn.Module):
         **kwargs,
     ):
         super().__init__()
-        
-        dw = kwargs.get("dw", False)
+
         dynamic = kwargs.get("dynamic", False)
-        pool_mode = kwargs.get("pool_mode", "mix")
-        
-        
+        dw = kwargs.get("dw", False)
+
         if dynamic == True:
             self.block = nn.Sequential(
-                Dynamic_conv2d(in_channels=in_channels,
-                               out_channels=inter_channels,
-                               kernel_size=1,
-                               stride=stride,
-                               pool_mode=pool_mode),
+                conv_dy(
+                    inplanes=inter_channels,
+                    planes=inter_channels,
+                    kernel_size=3,
+                    padding=1,
+                    stride=stride,
+                ),
                 nn.BatchNorm2d(inter_channels),
                 getActFunc(act_func),
                 
-                Dynamic_conv2d(in_channels=inter_channels,
-                               out_channels=inter_channels,
-                               kernel_size=3,
-                               padding=1,
-                               stride=stride,
-                               pool_mode=pool_mode) 
-                if dw == False
-                else Dynamic_conv2d(in_channels=inter_channels,
-                                    out_channels=inter_channels,
-                                    kernel_size=3,
-                                    padding=1,
-                                    groups=inter_channels,
-                                    stride=stride,
-                                    pool_mode=pool_mode),
+                
+                conv_dy(
+                    inplanes=in_channels,
+                    planes=inter_channels,
+                    kernel_size=1,
+                    stride=stride,
+                    padding=0
+                ),
                 nn.BatchNorm2d(inter_channels),
                 getActFunc(act_func),
                 
-                Dynamic_conv2d(in_channels=in_channels,
-                               out_channels=inter_channels,
-                               kernel_size=1,
-                               stride=stride,
-                               pool_mode=pool_mode),
-                nn.BatchNorm2d(out_channels),
+                
+                conv_dy(
+                    inplanes=inter_channels,
+                    planes=inter_channels,
+                    kernel_size=3,
+                    padding=1,
+                    stride=stride,
+                )
             )
         else:
             self.block = nn.Sequential(
-                nn.Conv2d(in_channels,
-                          inter_channels,
-                          1,
-                          stride),
+                nn.Conv2d(in_channels, inter_channels, 1, stride),
                 nn.BatchNorm2d(inter_channels),
                 getActFunc(act_func),
-                
-                nn.Conv2d(inter_channels,
-                          inter_channels,
-                          kernel_size=3,
-                          padding=1)
+                nn.Conv2d(inter_channels, inter_channels, kernel_size=3, padding=1)
                 if dw == False
                 else nn.Conv2d(
                     inter_channels,
@@ -151,10 +140,7 @@ class ResBlock(nn.Module):
                 ),
                 nn.BatchNorm2d(inter_channels),
                 getActFunc(act_func),
-                
-                nn.Conv2d(inter_channels,
-                          out_channels,
-                          kernel_size=1),
+                nn.Conv2d(inter_channels, out_channels, kernel_size=1),
                 nn.BatchNorm2d(out_channels),
             )
 
@@ -183,7 +169,7 @@ class ResBlock(nn.Module):
 
 
 @BACKBONES.register_module()
-class DynamicResNetPoolMix(nn.Module):
+class DynamicDecompResNet(nn.Module):
     def __init__(
         self,
         stem_channels: int = 96,
@@ -202,9 +188,8 @@ class DynamicResNetPoolMix(nn.Module):
         ],  # last_channels stage1, stage2, stage3, stage4
         strides=[1, 1, 1, 1],
         act_func="ReLU",
-        dw = [False, False, False, False],
-        dynamic = [False, False, False, False],
-        pool_mode = "mix",
+        dw=[False, False, False, False],
+        dynamic=[False, False, False, False],
         **kwargs,
     ):
         super().__init__()
@@ -234,7 +219,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[0],
                     dynamic=dynamic[0],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stem_channels,
@@ -244,7 +228,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[0],
                     dynamic=dynamic[0],
-                    pool_mode=pool_mode
                 ),
             ]
         )
@@ -258,7 +241,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[1],
                     dynamic=dynamic[1],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[0] * 2,
@@ -268,7 +250,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[1],
                     dynamic=dynamic[1],
-                    pool_mode=pool_mode
                 ),
             ]
         )
@@ -282,7 +263,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[2],
                     dynamic=dynamic[2],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[1] * 2,
@@ -292,7 +272,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[2],
                     dynamic=dynamic[2],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[1] * 2,
@@ -302,7 +281,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[2],
                     dynamic=dynamic[2],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[1] * 2,
@@ -312,7 +290,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[2],
                     dynamic=dynamic[2],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[1] * 2,
@@ -322,7 +299,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[2],
                     dynamic=dynamic[2],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[1] * 2,
@@ -332,7 +308,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[2],
                     dynamic=dynamic[2],
-                    pool_mode=pool_mode
                 ),
             ]
         )
@@ -346,7 +321,6 @@ class DynamicResNetPoolMix(nn.Module):
                     act_func,
                     dw=dw[3],
                     dynamic=dynamic[3],
-                    pool_mode=pool_mode
                 ),
                 ResBlock(
                     stage_out_channels[2] * 2,
@@ -355,8 +329,7 @@ class DynamicResNetPoolMix(nn.Module):
                     1,
                     act_func,
                     dw=dw[3],
-                    dynamic = dynamic[3],
-                    pool_mode=pool_mode
+                    dynamic=dynamic[3],
                 ),
             ]
         )
@@ -382,10 +355,7 @@ class DynamicResNetPoolMix(nn.Module):
 
         return tuple(outs)
 
-def count_parameters(model:nn.Module):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 if __name__ == "__main__":
-    m = DynamicResNetPoolMix(dynamic = [False, False, False, True], pool_mode="mix")
-    print(m(torch.randn(64,3,224,224))[-1].shape)
-    print(count_parameters(m))
+    m = DynamicDecompResNet(dynamic=[False, False, False, False])
+    summary(m, (3, 224, 224), device="cpu", batch_size=1)

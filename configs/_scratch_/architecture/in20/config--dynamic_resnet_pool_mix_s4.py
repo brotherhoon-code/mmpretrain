@@ -142,16 +142,19 @@ load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=True)
 
+# 61,313,600
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='SwinLikeResNet3', 
-                  block_type = "BottleneckResBlock",
+    backbone=dict(type='DynamicResNetPoolMix', 
                   stem_channels = 96,
                   stage_blocks = [2,2,6,2], 
                   feature_channels = [96,192,384,768],
                   stage_out_channels = [96,192,384,768],
                   strides = [1,1,1,1],
-                  act_func = "GELU"),
+                  act_func = "GELU",
+                  dw = [False, False, False, False],
+                  dynamic=[False, False, False, True],
+                  pool_mode="mix"),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
