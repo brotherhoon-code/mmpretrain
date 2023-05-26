@@ -60,6 +60,7 @@ from .custom_resnet_swinlike import SwinLikeResNet
 from .custom_dynamic_resnet import DynamicResNet
 from .custom_resnet_swinlike_dw import SwinLikeDWResNet
 from .custom_resnet_swinlike_dw_rescale import SwinLikeRescaleDWResNet
+from .custom_resnet_swinlike_dw_odconv import ODSwinLikeDWResNet
 
 
 __all__ = [
@@ -131,5 +132,6 @@ __all__ = [
     'SwinLikeResNet',
     'DynamicResNet',
     'SwinLikeDWResNet',
-    'SwinLikeRescaleDWResNet'
+    'SwinLikeRescaleDWResNet',
+    'ODSwinLikeDWResNet'
     ]
