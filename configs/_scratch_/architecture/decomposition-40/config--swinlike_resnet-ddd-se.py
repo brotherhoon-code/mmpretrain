@@ -1,13 +1,14 @@
 # dataset settings
 BATCH_SIZE = 64
-LEARNING_RATE = 0.1 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
-MAX_EPOCHS = 100
-VAL_INTERVAL = 1
+LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
+MAX_EPOCHS = 300
+VAL_INTERVAL = 10
+N_CLASSES = 40
 
 dataset_type = 'ImageNet'
 
 data_preprocessor = dict(
-    num_classes=20,
+    num_classes=N_CLASSES,
     # RGB format normalization parameters
     mean=[123.675, 116.28, 103.53],
     std=[58.395, 57.12, 57.375],
@@ -20,14 +21,40 @@ bgr_std = data_preprocessor['std'][::-1]
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=224),
+    dict(
+        type='RandomResizedCrop',
+        scale=224,
+        backend='pillow',
+        interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(
+        type='RandAugment',
+        policies='timm_increasing',
+        num_policies=2,
+        total_level=10,
+        magnitude_level=9,
+        magnitude_std=0.5,
+        hparams=dict(
+            pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')),
+    dict(
+        type='RandomErasing',
+        erase_prob=0.25,
+        mode='rand',
+        min_area_ratio=0.02,
+        max_area_ratio=1 / 3,
+        fill_color=bgr_mean,
+        fill_std=bgr_std),
     dict(type='PackInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='ResizeEdge', scale=256, edge='short'),
+    dict(
+        type='ResizeEdge',
+        scale=256,
+        edge='short',
+        backend='pillow',
+        interpolation='bicubic'),
     dict(type='CenterCrop', crop_size=224),
     dict(type='PackInputs'),
 ]
@@ -38,8 +65,8 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/train_20.txt',
-        data_prefix='train_20',
+        ann_file='meta/train_40.txt',
+        data_prefix='train_40',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
@@ -50,8 +77,8 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/val_20.txt',
-        data_prefix='val_20',
+        ann_file='meta/val_40.txt',
+        data_prefix='val_40',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
@@ -63,11 +90,27 @@ test_evaluator = val_evaluator
 
 # lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 optim_wrapper = dict(
-    optimizer=dict(type='SGD', lr=LEARNING_RATE, momentum=0.9, weight_decay=0.0001))
+    optimizer=dict(
+        type='AdamW',
+        lr= LEARNING_RATE, # 0.045789 
+        weight_decay=0.05,
+        eps=1e-8,
+        betas=(0.9, 0.999)),
+)
 
 # learning policy
-param_scheduler = dict(
-    type='MultiStepLR', by_epoch=True, milestones=[30, 60, 90], gamma=0.1)
+param_scheduler = [
+    # warm up learning rate scheduler
+    dict(
+        type='LinearLR',
+        start_factor=1e-3,
+        by_epoch=True,
+        end=20,
+        # update by iter
+        convert_to_iter_based=True),
+    # main learning rate scheduler
+    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
+]
 
 train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL)
 val_cfg = dict()
@@ -93,7 +136,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='ResNet', # check
+                                           project='decomposition', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -102,19 +145,21 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='CustomResNet', 
+    backbone=dict(type='SwinLikeRescaleDWResNet', 
                   block_type = "BottleneckResBlock",
-                  stem_type = "Resnet",
-                  stem_channels = 64,
-                  stage_blocks = [3, 4, 6, 3], 
-                  feature_channels = [64, 128, 256, 512], # [64, 128, 256, 512], [96, 192, 384, 768]
-                  stage_out_channels = [256, 512, 1024, 2048], # [256, 512, 1024, 2048], [192, 384, 768, 3072]
-                  strides = [1,2,2,2]),
+                  stem_channels = 96,
+                  stage_blocks = [3, 3, 3, 3],
+                  feature_channels = [96, 192, 384, 768],
+                  stage_out_channels = [96, 192, 384, 768],
+                  strides = [1, 1, 1, 1],
+                  act_func = "GELU",
+                  dw=[True, True, True],
+                  attn_type="SE"),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
-        num_classes=20,
-        in_channels=2048, # 2048, 3072
+        num_classes=N_CLASSES,
+        in_channels=768,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)),
     train_cfg=dict(augments=[
         dict(type='Mixup', alpha=0.8),

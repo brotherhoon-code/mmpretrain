@@ -1,13 +1,14 @@
 # dataset settings
 BATCH_SIZE = 64
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
-MAX_EPOCHS = 100
-VAL_INTERVAL = 1
+MAX_EPOCHS = 300
+VAL_INTERVAL = 10
+N_CLASSES = 40
 
 dataset_type = 'ImageNet'
 
 data_preprocessor = dict(
-    num_classes=20,
+    num_classes=N_CLASSES,
     # RGB format normalization parameters
     mean=[123.675, 116.28, 103.53],
     std=[58.395, 57.12, 57.375],
@@ -64,8 +65,8 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/train_20.txt',
-        data_prefix='train_20',
+        ann_file='meta/train_40.txt',
+        data_prefix='train_40',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
@@ -76,8 +77,8 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/val_20.txt',
-        data_prefix='val_20',
+        ann_file='meta/val_40.txt',
+        data_prefix='val_40',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
@@ -135,7 +136,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='ResNet', # check
+                                           project='decomposition', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -144,18 +145,18 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='SwinLikeResNet', 
+    backbone=dict(type='SwinLikeResNet',
                   block_type = "BottleneckResBlock",
                   stem_channels = 96,
-                  stage_blocks = [2,2,6,2], 
-                  feature_channels = [96,192,384,768],
-                  stage_out_channels = [96,192,384,768],
-                  strides = [1,1,1,1],
+                  stage_blocks = [3, 3, 3, 3],
+                  feature_channels = [96, 192, 384, 768],
+                  stage_out_channels = [96, 192, 384, 768],
+                  strides = [1, 1, 1, 1],
                   act_func = "GELU"),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
-        num_classes=20,
+        num_classes=N_CLASSES,
         in_channels=768,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0)),
     train_cfg=dict(augments=[

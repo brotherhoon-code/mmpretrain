@@ -57,11 +57,9 @@ from .xcit import XCiT
 from .carrot import Carrot
 from .custom_resnet import CustomResNet
 from .custom_resnet_swinlike import SwinLikeResNet
-from .custom_resnet_swinlike2 import SwinLikeResNet2
-from .custom_resnet_swinlike3 import SwinLikeResNet3
 from .custom_dynamic_resnet import DynamicResNet
-from .custom_dynamic_resnet_pool_mix import DynamicResNetPoolMix
-from .custom_dynamic_decomp_resnet import DynamicDecompResNet
+from .custom_resnet_swinlike_dw import SwinLikeDWResNet
+from .custom_resnet_swinlike_dw_rescale import SwinLikeRescaleDWResNet
 
 
 __all__ = [
@@ -130,12 +128,8 @@ __all__ = [
     'Carrot',
     
     'CustomResNet',
-    
     'SwinLikeResNet',
-    'SwinLikeResNet2',
-    'SwinLikeResNet3',
-    
     'DynamicResNet',
-    'DynamicResNetPoolMix',
-    'DynamicDecompResNet'
+    'SwinLikeDWResNet',
+    'SwinLikeRescaleDWResNet'
     ]
