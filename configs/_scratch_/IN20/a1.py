@@ -1,5 +1,5 @@
 # dataset settings
-BATCH_SIZE = 128
+BATCH_SIZE = 256
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 300
 VAL_INTERVAL = 10
@@ -145,22 +145,18 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1),
+    backbone=dict(type='A1',
+                  stage_channels=[96, 192, 384, 768],
+                  stage_blocks=[3, 3, 9, 3],
+                  patch_size=[4, 2, 2, 2],
+                  kernel_size=7),
+    neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
         in_channels=768,
-        loss=dict(
-            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
-        init_cfg=None,
-    ),
-    init_cfg=dict(
-        type='TruncNormal', layer=['Conv2d', 'Linear'], std=.02, bias=0.),
-    train_cfg=dict(augments=[
-        dict(type='Mixup', alpha=0.8),
-        dict(type='CutMix', alpha=1.0),
-    ]),
-)
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+    ))
 
 
 launcher = 'none'

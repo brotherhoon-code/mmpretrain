@@ -1,5 +1,5 @@
 # dataset settings
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 300
 VAL_INTERVAL = 10

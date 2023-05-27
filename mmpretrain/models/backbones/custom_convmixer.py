@@ -89,14 +89,12 @@ class MixerBlock(nn.Module):
 class CustomConvMixer(nn.Module):
     def __init__(self, 
                  dim:int, 
-                 depth: int, 
+                 depth:int, 
                  patch_size:int, 
                  kernel_size:int):
         super(CustomConvMixer, self).__init__()
         self.patch_embed_layer = PatchEmbedBlock(3, dim, patch_size)
-        self.mixer_layers = nn.Sequential(*[MixerBlock(dim, kernel_size)]*depth)
-        print(self.patch_embed_layer)
-        print(self.mixer_layers)
+        self.mixer_layers = nn.Sequential(*[MixerBlock(dim, kernel_size) for _ in range(depth)])
 
     def forward(self, x):
         x = self.patch_embed_layer(x)
@@ -108,10 +106,10 @@ class CustomConvMixer(nn.Module):
 
 
 if __name__ == "__main__":
-    convmixer = ConvMixer_v1(dim=256,
-                             depth=8,
-                             patch_size=7,
-                             kernel_size=7)
+    convmixer = CustomConvMixer(dim=768,
+                                depth=32,
+                                patch_size=7,
+                                kernel_size=7)
     summary(convmixer, (3, 224, 224), batch_size=256, device="cpu")
     
     

@@ -61,6 +61,8 @@ from .custom_dynamic_resnet import DynamicResNet
 from .custom_resnet_swinlike_dw import SwinLikeDWResNet
 from .custom_resnet_swinlike_dw_rescale import SwinLikeRescaleDWResNet
 from .custom_resnet_swinlike_dw_odconv import ODSwinLikeDWResNet
+from .custom_convmixer import CustomConvMixer
+from .a1 import A1
 
 
 __all__ = [
@@ -133,5 +135,7 @@ __all__ = [
     'DynamicResNet',
     'SwinLikeDWResNet',
     'SwinLikeRescaleDWResNet',
-    'ODSwinLikeDWResNet'
+    'ODSwinLikeDWResNet',
+    'CustomConvMixer',
+    'A1'
     ]
