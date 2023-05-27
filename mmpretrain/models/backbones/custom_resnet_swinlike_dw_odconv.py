@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from typing import Any, Callable, List, Optional, Type, Union
-from mmpretrain.models.backbones.custom_modules.attention import Dynamic_conv2d
+from mmpretrain.models.backbones.custom_modules.attention import ODconv2d
 from ..builder import BACKBONES
 
 
@@ -113,41 +113,42 @@ class BottleneckResBlock(nn.Module):
             )
         elif od is True:
             self.block = nn.Sequential(
-                Dynamic_conv2d(
+                ODconv2d(
                     in_channels=in_channels,
                     out_channels=inter_channels,
                     kernel_size=1,
-                    K=1,
-                    temperature=40,
+                    kernel_num=1,
+                    temperature=30,
                 ),
                 nn.BatchNorm2d(inter_channels),
                 getActFunc(act_func),
-                Dynamic_conv2d(
+                ODconv2d(
                     in_channels=inter_channels,
                     out_channels=inter_channels,
                     kernel_size=3,
+                    kernel_num=1,
                     padding=1,
-                    K=1,
-                    temperature=40,
+                    groups=inter_channels,
+                    temperature=30,
                 )
                 if dw == False
-                else Dynamic_conv2d(
-                    in_channels=inter_channels,
+                else ODconv2d(
+                    in_channels=in_channels,
                     out_channels=inter_channels,
-                    kernel_size=3,
-                    groups=inter_channels,
-                    padding=1,
-                    K=1,
-                    temperature=40,
+                    kernel_size=1,
+                    kernel_num=1,
+                    temperature=30,
                 ),
                 nn.BatchNorm2d(inter_channels),
                 getActFunc(act_func),
-                Dynamic_conv2d(
+                ODconv2d(
                     in_channels=inter_channels,
-                    out_channels=out_channels,
-                    kernel_size=1,
-                    K=1,
-                    temperature=40,
+                    out_channels=inter_channels,
+                    kernel_size=3,
+                    kernel_num=1,
+                    padding=1,
+                    groups=inter_channels,
+                    temperature=30,
                 ),
                 nn.BatchNorm2d(out_channels),
             )
