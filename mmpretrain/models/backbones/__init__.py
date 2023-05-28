@@ -57,12 +57,12 @@ from .xcit import XCiT
 from .carrot import Carrot
 from .custom_resnet import CustomResNet
 from .custom_resnet_swinlike import SwinLikeResNet
-from .custom_dynamic_resnet import DynamicResNet
 from .custom_resnet_swinlike_dw import SwinLikeDWResNet
 from .custom_resnet_swinlike_dw_rescale import SwinLikeRescaleDWResNet
 from .custom_resnet_swinlike_dw_odconv import ODSwinLikeDWResNet
 from .custom_convmixer import CustomConvMixer
 from .a1 import A1
+from .a2 import A2
 
 
 __all__ = [
@@ -132,10 +132,10 @@ __all__ = [
     
     'CustomResNet',
     'SwinLikeResNet',
-    'DynamicResNet',
     'SwinLikeDWResNet',
     'SwinLikeRescaleDWResNet',
     'ODSwinLikeDWResNet',
     'CustomConvMixer',
-    'A1'
+    'A1',
+    'A2'
     ]
