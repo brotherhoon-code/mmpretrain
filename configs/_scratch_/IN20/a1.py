@@ -96,6 +96,7 @@ optim_wrapper = dict(
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    clip_grad=dict(max_norm=5.0)
 )
 
 # learning policy
@@ -117,7 +118,9 @@ val_cfg = dict()
 test_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
+
 default_scope = 'mmpretrain'
+
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),

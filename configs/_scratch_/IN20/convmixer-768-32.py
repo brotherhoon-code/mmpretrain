@@ -1,6 +1,6 @@
 # dataset settings
-BATCH_SIZE = 128
-LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
+BATCH_SIZE = 32
+LEARNING_RATE = 0.01 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 300
 VAL_INTERVAL = 10
 N_CLASSES = 20
@@ -96,6 +96,7 @@ optim_wrapper = dict(
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    clip_grad=dict(max_norm=5.0)
 )
 
 # learning policy

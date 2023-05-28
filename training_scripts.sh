@@ -1,8 +1,8 @@
 #!/bin/sh
-sh ./training_script_01.sh
-sh ./training_script_02.sh
-sh ./training_script_03.sh
+# sh ./training_script_01.sh
+# sh ./training_script_02.sh
 sh ./training_script_04.sh
+sh ./training_script_03.sh
 
 # CONFIG_NAME00="config--resnet-origin" 
 # CONFIG_NAME01="config--swinlike_resnet"

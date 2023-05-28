@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-# from ..builder import BACKBONES
+from ..builder import BACKBONES
 
 
 class PatchEmbedBlock(nn.Module):
@@ -82,7 +82,7 @@ class MixerBlock(nn.Module):
         return x
 
 
-# @BACKBONES.register_module()
+@BACKBONES.register_module()
 class A1(nn.Module):
     def __init__(self,
                  stage_channels: int=[96, 192, 384, 768],
