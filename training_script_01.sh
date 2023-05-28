@@ -1,5 +1,5 @@
 #!/bin/sh
-CONFIG_NAME="swinT"
+CONFIG_NAME="a3"
 CONFIG_FILE=./configs/_scratch_/IN20/${CONFIG_NAME}.py
 WORK_DIR=./work_dir/${CONFIG_NAME}
 EXP_NAME=${CONFIG_NAME}

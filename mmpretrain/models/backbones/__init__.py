@@ -63,6 +63,7 @@ from .custom_resnet_swinlike_dw_odconv import ODSwinLikeDWResNet
 from .custom_convmixer import CustomConvMixer
 from .a1 import A1
 from .a2 import A2
+from .a3 import A3
 
 
 __all__ = [
@@ -137,5 +138,6 @@ __all__ = [
     'ODSwinLikeDWResNet',
     'CustomConvMixer',
     'A1',
-    'A2'
+    'A2',
+    'A3'
     ]
