@@ -1,7 +1,7 @@
 # dataset settings
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
-MAX_EPOCHS = 300
+MAX_EPOCHS = 100
 VAL_INTERVAL = 10
 N_CLASSES = 40
 
@@ -96,6 +96,7 @@ optim_wrapper = dict(
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    clip_grad=dict(max_norm=5.0)
 )
 
 # learning policy
@@ -117,7 +118,9 @@ val_cfg = dict()
 test_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
+
 default_scope = 'mmpretrain'
+
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
@@ -145,7 +148,11 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='ConvMixer', arch='768/32', act_cfg=dict(type='ReLU')),
+    backbone=dict(type='A1',
+                  stage_channels=[96, 192, 384, 768],
+                  stage_blocks=[3, 3, 9, 3],
+                  patch_size=[4, 2, 2, 2],
+                  kernel_size=7),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',

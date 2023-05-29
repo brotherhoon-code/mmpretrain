@@ -21,49 +21,41 @@ bgr_std = data_preprocessor['std'][::-1]
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    # dict(
-    #     type='RandomResizedCrop',
-    #     scale=224,
-    #     backend='pillow',
-    #     interpolation='bicubic'),
-    # dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    # dict(
-    #     type='RandAugment',
-    #     policies='timm_increasing',
-    #     num_policies=2,
-    #     total_level=10,
-    #     magnitude_level=9,
-    #     magnitude_std=0.5,
-    #     hparams=dict(
-    #         pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')),
-    # dict(
-    #     type='RandomErasing',
-    #     erase_prob=0.25,
-    #     mode='rand',
-    #     min_area_ratio=0.02,
-    #     max_area_ratio=1 / 3,
-    #     fill_color=bgr_mean,
-    #     fill_std=bgr_std),
-    ###
-    dict(type='RandomResizedCrop', scale=224),
+    dict(
+        type='RandomResizedCrop',
+        scale=224,
+        backend='pillow',
+        interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    ###
+    dict(
+        type='RandAugment',
+        policies='timm_increasing',
+        num_policies=2,
+        total_level=10,
+        magnitude_level=9,
+        magnitude_std=0.5,
+        hparams=dict(
+            pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')),
+    dict(
+        type='RandomErasing',
+        erase_prob=0.25,
+        mode='rand',
+        min_area_ratio=0.02,
+        max_area_ratio=1 / 3,
+        fill_color=bgr_mean,
+        fill_std=bgr_std),
     dict(type='PackInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    # dict(
-    #     type='ResizeEdge',
-    #     scale=256,
-    #     edge='short',
-    #     backend='pillow',
-    #     interpolation='bicubic'),
-    # dict(type='CenterCrop', crop_size=224),
-    ###
-    dict(type='ResizeEdge', scale=256, edge='short'),
+    dict(
+        type='ResizeEdge',
+        scale=256,
+        edge='short',
+        backend='pillow',
+        interpolation='bicubic'),
     dict(type='CenterCrop', crop_size=224),
-    ###
     dict(type='PackInputs'),
 ]
 
@@ -104,6 +96,7 @@ optim_wrapper = dict(
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    clip_grad=dict(max_norm=5.0)
 )
 
 # learning policy
@@ -125,7 +118,9 @@ val_cfg = dict()
 test_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
+
 default_scope = 'mmpretrain'
+
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
@@ -153,24 +148,18 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1),
+    backbone=dict(type='A3',
+                  stage_channels=[96, 192, 384, 768],
+                  stage_blocks=[3, 3, 9, 3],
+                  patch_size=[4, 2, 2, 2],
+                  kernel_size=7),
+    neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
         in_channels=768,
-        # loss=dict(
-        #     type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
-        init_cfg=None,
-    ),
-    init_cfg=dict(
-        type='TruncNormal', layer=['Conv2d', 'Linear'], std=.02, bias=0.),
-    # train_cfg=dict(augments=[
-    #     dict(type='Mixup', alpha=0.8),
-    #     dict(type='CutMix', alpha=1.0),
-    # ]
-    #                ),
-)
+    ))
 
 
 launcher = 'none'
