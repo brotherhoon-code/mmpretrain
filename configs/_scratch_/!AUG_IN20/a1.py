@@ -70,6 +70,7 @@ optim_wrapper = dict(
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    clip_grad=dict(max_norm=5.0)
 )
 
 # learning policy
@@ -91,7 +92,9 @@ val_cfg = dict()
 test_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
+
 default_scope = 'mmpretrain'
+
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
@@ -119,17 +122,16 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(
-        type='ResNet',
-        depth=50,
-        num_stages=4,
-        out_indices=(3, ),
-        style='pytorch'),
+    backbone=dict(type='A1',
+                  stage_channels=[96, 192, 384, 768],
+                  stage_blocks=[3, 3, 9, 3],
+                  patch_size=[4, 2, 2, 2],
+                  kernel_size=7),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
-        in_channels=2048,
+        in_channels=768,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
         topk=(1, 5),
     ))
