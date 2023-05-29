@@ -1,6 +1,6 @@
 #!/bin/sh
 CONFIG_NAME="convnextT"
-CONFIG_FILE=./configs/_scratch_/IN20/${CONFIG_NAME}.py
+CONFIG_FILE=./configs/_scratch_/!AUG_IN20/${CONFIG_NAME}.py
 WORK_DIR=./work_dir/${CONFIG_NAME}
 EXP_NAME=${CONFIG_NAME}
 
