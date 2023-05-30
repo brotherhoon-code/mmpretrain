@@ -16,11 +16,22 @@ def getActFunc(type: str = "ReLU"):
         raise ValueError(f"{type}is not implemented")
     return function
 
+def fusion(input, attn, fusion:str):
+    output = None
+    if fusion == "scale":
+        output = input * attn
+    elif fusion == "add":
+        output = input + attn
+    else:
+        raise ValueError(f"fusion={fusion} is not registered")
+    return output
+    
 
 class SEModule(nn.Module):
-    def __init__(self, in_channels, r=16, activ_func="ReLU", importance="mean"):
+    def __init__(self, in_channels, r=16, activ_func="ReLU", importance="mean", fusion="scale"):
         super().__init__()
         hidden_features = int(in_channels // r)
+        self.fusion = fusion
         self.squeeze = Reduce("B C H W -> B C 1 1", reduction="mean")
         self.flatten = nn.Flatten()
         self.mlp1 = nn.Linear(in_features=in_channels, out_features=hidden_features)
@@ -38,14 +49,15 @@ class SEModule(nn.Module):
         attn = self.prob_func(attn)  # B C
         attn = attn.unsqueeze(dim=-1).unsqueeze(dim=-1)  # B C 1 1
         attn = repeat(attn, pattern="B C 1 1 -> B C H W", H=H, W=W)  # B C H W
-        x = x * attn  # B C H W
+        x = fusion(x, attn, self.fusion)
         return x
 
 
 class CBAM_C(nn.Module):
-    def __init__(self, in_channels, r=16, activ_func="ReLU"):
+    def __init__(self, in_channels, r=16, activ_func="ReLU", fusion="scale"):
         super().__init__()
         hidden_features = in_channels // r
+        self.fusion = fusion
         self.avgpool = Reduce(pattern="B C H W -> B C 1 1", reduction="mean")
         self.maxpool = Reduce(pattern="B C H W -> B C 1 1", reduction="max")
         self.flatten = nn.Flatten()
@@ -73,14 +85,14 @@ class CBAM_C(nn.Module):
         attn = self.prob_func(attn)  # B C
         attn = attn.unsqueeze(dim=-1).unsqueeze(dim=-1)  # B C 1 1
         attn = repeat(attn, pattern="B C 1 1 -> B C H W", H=H, W=W)  # B C H W
-
-        x = x * attn
+        x = fusion(x, attn, self.fusion)
         return x
 
 
 class CBAM_S(nn.Module):
-    def __init__(self, kernel_size=7):
+    def __init__(self, kernel_size=7, fusion="scale"):
         super().__init__()
+        self.fusion = fusion
         self.avgpool = Reduce(pattern="B C H W -> B 1 H W", reduction="mean")
         self.maxpool = Reduce(pattern="B C H W -> B 1 H W", reduction="max")
         self.conv0 = nn.Conv2d(
@@ -94,7 +106,7 @@ class CBAM_S(nn.Module):
         attn = self.conv0(attn)  # B 1 H W
         attn = self.prob_func(attn)  # B 1 H W
         attn = repeat(attn, pattern="B 1 H W -> B C H W", C=C)  # B C H W
-        x = x * attn  # B C H W
+        x = fusion(x, attn, self.fusion)
         return x
 
 class Attention(nn.Module):
