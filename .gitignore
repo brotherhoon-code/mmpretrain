@@ -2,6 +2,7 @@
 work_dir/*
 artifacts/*
 wandb/*
+*.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

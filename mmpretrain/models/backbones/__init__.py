@@ -64,6 +64,9 @@ from .custom_convmixer import CustomConvMixer
 from .a1 import A1
 from .a2 import A2
 from .a3 import A3
+from .a4 import A4
+from .a5 import A5
+from .a6 import A6
 
 
 __all__ = [
@@ -139,5 +142,8 @@ __all__ = [
     'CustomConvMixer',
     'A1',
     'A2',
-    'A3'
+    'A3',
+    'A4',
+    'A5',
+    'A6'
     ]

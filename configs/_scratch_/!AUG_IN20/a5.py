@@ -120,9 +120,9 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A2',
+    backbone=dict(type='A5',
                   stage_channels=[96, 192, 384, 768],
-                  stage_blocks=[3, 3, 9, 3],
+                  stage_blocks=[2, 2, 2, 2],
                   patch_size=[4, 2, 2, 2],
                   kernel_size=7),
     neck=dict(type='GlobalAveragePooling'),
