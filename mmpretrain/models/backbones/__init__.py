@@ -71,6 +71,8 @@ from .a7 import A7
 from .a8 import A8
 from .a9 import A9
 from .a10 import A10
+from .a11 import A11
+from .a12 import A12
 
 
 __all__ = [
@@ -154,4 +156,6 @@ __all__ = [
     'A8',
     'A9',
     'A10',
+    'A11',
+    'A12'
     ]
