@@ -6,6 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
+from mmpretrain.models.backbones.custom_modules.attention import SpatialAttention1
 from ..builder import BACKBONES
 
 
@@ -45,11 +46,13 @@ class SpatialMixBlock(nn.Module):
         )
         self.active_func = nn.GELU()
         self.bn_layer = nn.BatchNorm2d(num_features=dim)
+        self.attn = SpatialAttention1(dim=dim, fusion="scale")
 
     def forward(self, x):
         x = self.spatial_mix_layer(x)
         x = self.active_func(x)
         x = self.bn_layer(x)
+        x = self.attn(x)
         return x
 
 
@@ -83,7 +86,7 @@ class MixerBlock(nn.Module):
 
 
 @BACKBONES.register_module()
-class A4(nn.Module):
+class A13(nn.Module):
     def __init__(self,
                  stage_channels: int=[96, 192, 384, 768],
                  stage_blocks: int=[2, 2, 2, 2],
@@ -124,7 +127,7 @@ class A4(nn.Module):
 
 
 if __name__ == "__main__":
-    m = A4()
+    m = A13()
     input_img = torch.Tensor(1, 3, 224, 224)
     flops = FlopCountAnalysis(m, input_img)
 

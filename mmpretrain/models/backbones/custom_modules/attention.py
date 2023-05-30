@@ -4,6 +4,8 @@ import torch.nn.functional as F
 from einops.layers.torch import Rearrange, Reduce
 from einops import repeat
 import torch.autograd
+from torchsummary import summary
+from fvcore.nn import FlopCountAnalysis, flop_count_table
 
 
 def getActFunc(type: str = "ReLU"):
@@ -288,3 +290,39 @@ class ODconv2d(nn.Module):
     
     def forward(self, x):
         return self._forward_impl(x)
+    
+class SpatialAttention1(nn.Module):
+    def __init__(self, dim:int, fusion:str="scale"):
+        super().__init__()
+        self.maxpool = Reduce("B C H W -> B 1 H W", reduction="max")
+        self.avgpool = Reduce("B C H W -> B 1 H W", reduction="mean")
+        self.fusion = fusion
+        self.conv = nn.Sequential(*[nn.Conv2d(in_channels=2, out_channels=dim, kernel_size=1, stride=1, padding="same"),
+                                    nn.ReLU(inplace=True)])
+        if fusion == "pointwise":
+            self.conv1 = nn.Conv2d(in_channels=dim*2, out_channels=dim, kernel_size=(1,1))
+        self.activ_func = nn.Sigmoid()
+        
+    def forward(self, x):
+        attn_map = torch.concat([self.maxpool(x), self.avgpool(x)], dim=1) # B 2 H W
+        attn_map = self.conv(attn_map) # B C H W
+        if self.fusion != "pointwise":
+            x = fusion(input=x, attn=attn_map, fusion=self.fusion) # B C H W
+        elif self.fusion == "pointwise":
+            x = self.conv1(torch.concat([x, attn_map], dim=1)) # B C H W
+        else:
+            raise ValueError(f'fusion = {fusion} is not implemented')
+        x = self.activ_func(x)
+        return x
+
+
+if __name__ == "__main__":
+    input = torch.randn(4,96,52,52)
+    m = SpatialAttention1(dim=96, fusion="scale")
+    output:torch.Tensor = m(input)
+    print(output.shape)
+    summary(m, (96,52,52), batch_size=4, device="cpu")
+    flops = FlopCountAnalysis(m, torch.Tensor(4,96,52,52))
+    print(flop_count_table(flops))
+    formatted_number = "{:.2f}G".format(flops.total() / 1e9)
+    print(formatted_number)
