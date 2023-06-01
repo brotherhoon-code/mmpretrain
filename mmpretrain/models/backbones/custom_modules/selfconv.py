@@ -31,7 +31,7 @@ class SpatialSelfConv(nn.Module):
         hidden_dim: int,
         dropout_ratio: float = 0.2,
         activ_func:Literal["ReLU", "GELU", "Sigmoid", "None"] = "GELU",
-        bias:bool = True
+        bias:bool = False
     ):
         super().__init__()
         self.batch = batch
