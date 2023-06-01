@@ -51,12 +51,14 @@ class SpatialMixBlock(nn.Module):
             width=width,
             kernel_size=kernel_size,
             hidden_dim=dim,
-            activ_func=activ_func,
             bias=bias,
+            activ_func=activ_func,
         )
+        # self.bn_layer = nn.BatchNorm2d(num_features=dim)
 
     def forward(self, x):
         x = self.spatial_mix_layer(x)
+        # x = self.bn_layer(x)
         return x
 
 
@@ -109,8 +111,8 @@ class A17(nn.Module):
         stage_blocks: int = [2, 2, 2, 2],
         patch_size: int = [4, 2, 2, 2],
         kernel_size: int = 7,
-        activ_func="None",
         bias=False,
+        activ_func="None",
     ):
         super().__init__()
         self.s1_patch_embed = PatchEmbedBlock(
@@ -217,20 +219,12 @@ class A17(nn.Module):
         return tuple(outs)
 
 
-def count_model_parameters(model):
-    params = list(model.parameters())
-    num_params = sum(p.numel() for p in params)
-    return num_params
-
-
 if __name__ == "__main__":
-    m = A17(
-        stage_channels=[96,192,384,768],
-        stage_blocks=[2,2,2,2],
-        patch_size=[4,2,2,2],
-        kernel_size=7,
-        activ_func="GELU",
-        bias=False,
-    )
-    
-    print(count_model_parameters(m))
+    m = A17()
+    input_img = torch.Tensor(64, 3, 224, 224)
+    m(input_img)
+    flops = FlopCountAnalysis(m, input_img)
+    # summary(m, (3, 224, 224), batch_size=64, device="cpu")  # torchsummary
+    print(flop_count_table(flops))  # 테이블 형태로 각 연산하는 모듈마다 출력해주고, 전체도 출력해줌
+    formatted_number = "{:.2f}G".format(flops.total() / 1e9)
+    print(f"total FLOPs: {formatted_number}")  # kb단위로 모델전체 FLOPs 출력해줌

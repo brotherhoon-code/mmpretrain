@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-from mmpretrain.models.backbones.custom_modules.selfconv import SpatialSelfConv
+from mmpretrain.models.backbones.custom_modules.selfDWconv import SelfDWConv
 
 from ..builder import BACKBONES
 
@@ -34,7 +34,6 @@ class PatchEmbedBlock(nn.Module):
 class SpatialMixBlock(nn.Module):
     def __init__(
         self,
-        batch,
         channel,
         height,
         width,
@@ -44,15 +43,15 @@ class SpatialMixBlock(nn.Module):
         activ_func: str,
     ):
         super(SpatialMixBlock, self).__init__()
-        self.spatial_mix_layer = SpatialSelfConv(
-            batch=batch,
+        self.spatial_mix_layer = SelfDWConv(
             channel=channel,
             height=height,
             width=width,
             kernel_size=kernel_size,
             hidden_dim=dim,
-            activ_func=activ_func,
             bias=bias,
+            dropout_ratio=0.2,
+            activ_func=activ_func,
         )
 
     def forward(self, x):
@@ -78,7 +77,6 @@ class ChannelMixBlock(nn.Module):
 class MixerBlock(nn.Module):
     def __init__(
         self,
-        batch,
         channel,
         height,
         width,
@@ -91,26 +89,26 @@ class MixerBlock(nn.Module):
         self.dim = dim
         self.kernel_size = kernel_size
         self.spatial_mix_block = SpatialMixBlock(
-            batch, channel, height, width, kernel_size, dim, bias, activ_func
+            channel, height, width, kernel_size, dim, bias, activ_func
         )
         self.channel_mix_block = ChannelMixBlock(dim)
 
     def forward(self, x):
-        x = self.spatial_mix_block(x) + x  # delete skip conn
+        x = self.spatial_mix_block(x) + x
         x = self.channel_mix_block(x)
         return x
 
 
 @BACKBONES.register_module()
-class A17(nn.Module):
+class A18(nn.Module):
     def __init__(
         self,
         stage_channels: int = [96, 192, 384, 768],
         stage_blocks: int = [2, 2, 2, 2],
         patch_size: int = [4, 2, 2, 2],
         kernel_size: int = 7,
-        activ_func="None",
-        bias=False,
+        bias=True,
+        activ_func="GELU",
     ):
         super().__init__()
         self.s1_patch_embed = PatchEmbedBlock(
@@ -119,7 +117,6 @@ class A17(nn.Module):
         self.stage1 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     stage_channels[0],
                     56,
                     56,
@@ -140,7 +137,6 @@ class A17(nn.Module):
         self.stage2 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     stage_channels[1],
                     28,
                     28,
@@ -162,7 +158,6 @@ class A17(nn.Module):
         self.stage3 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     stage_channels[2],
                     14,
                     14,
@@ -183,7 +178,6 @@ class A17(nn.Module):
         self.stage4 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     stage_channels[3],
                     7,
                     7,
@@ -224,13 +218,12 @@ def count_model_parameters(model):
 
 
 if __name__ == "__main__":
-    m = A17(
-        stage_channels=[96,192,384,768],
-        stage_blocks=[2,2,2,2],
-        patch_size=[4,2,2,2],
-        kernel_size=7,
-        activ_func="GELU",
-        bias=False,
-    )
-    
-    print(count_model_parameters(m))
+    m = A18()
+    input_img = torch.Tensor(64, 3, 224, 224)
+    m(input_img)
+    flops = FlopCountAnalysis(m, input_img)
+    print(f"{count_model_parameters(m)/1e6:.2f}M params")
+    # summary(m, (3, 224, 224), batch_size=64, device="cpu")  # torchsummary
+    flop_count_table(flops)  # 테이블 형태로 각 연산하는 모듈마다 출력해주고, 전체도 출력해줌
+    formatted_number = "{:.2f}G".format(flops.total() / 1e9)
+    print(f"total FLOPs: {formatted_number}")  # kb단위로 모델전체 FLOPs 출력해줌

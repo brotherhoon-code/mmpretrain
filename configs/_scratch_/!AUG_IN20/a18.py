@@ -43,7 +43,6 @@ train_dataloader = dict(
         data_prefix='train_20',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
-    drop_last=True,
 )
 
 val_dataloader = dict(
@@ -56,7 +55,6 @@ val_dataloader = dict(
         data_prefix='val_20',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
-    drop_last=True,
 )
 val_evaluator = dict(type='Accuracy', topk=(1, 5))
 
@@ -118,17 +116,17 @@ visualizer = dict(type='UniversalVisualizer',
 log_level = 'INFO'
 load_from = None
 resume = False
-randomness = dict(seed=None, deterministic=False) # deterministic False
+randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A17',
+    backbone=dict(type='A18',
                   stage_channels=[96, 192, 384, 768],
                   stage_blocks=[2, 2, 2, 2],
                   patch_size=[4, 2, 2, 2],
                   kernel_size=7,
-                  activ_func="GELU",
-                  bias=True,),
+                  bias=True,
+                  activ_func="GELU"),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',

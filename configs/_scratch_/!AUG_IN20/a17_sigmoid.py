@@ -122,7 +122,7 @@ model = dict(
     type='ImageClassifier',
     backbone=dict(type='A17',
                   stage_channels=[96, 192, 384, 768],
-                  stage_blocks=[2, 2, 2, 2],
+                  stage_blocks=[3, 3, 3, 3],
                   patch_size=[4, 2, 2, 2],
                   kernel_size=7,
                   bias=False,

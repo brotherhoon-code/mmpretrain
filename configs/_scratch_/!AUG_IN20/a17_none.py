@@ -2,7 +2,7 @@
 BATCH_SIZE = 64
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 100
-VAL_INTERVAL = 5
+VAL_INTERVAL = 1
 N_CLASSES = 20
 
 dataset_type = 'ImageNet'
@@ -43,7 +43,6 @@ train_dataloader = dict(
         data_prefix='train_20',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
-    drop_last=True,
 )
 
 val_dataloader = dict(
@@ -56,7 +55,6 @@ val_dataloader = dict(
         data_prefix='val_20',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
-    drop_last=True,
 )
 val_evaluator = dict(type='Accuracy', topk=(1, 5))
 
@@ -127,8 +125,8 @@ model = dict(
                   stage_blocks=[2, 2, 2, 2],
                   patch_size=[4, 2, 2, 2],
                   kernel_size=7,
-                  activ_func="GELU",
-                  bias=True,),
+                  bias=False,
+                  activ_func="None"),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
