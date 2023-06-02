@@ -7,6 +7,7 @@ from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
 from mmpretrain.models.backbones.custom_modules.selfconv import SpatialSelfConv
+from mmpretrain.models.backbones.custom_modules.attention import SEModule
 
 from ..builder import BACKBONES
 
@@ -69,11 +70,15 @@ class ChannelMixBlock(nn.Module):
         super(ChannelMixBlock, self).__init__()
         self.dim = dim
         self.channel_mix_layer = nn.Conv2d(dim, dim, kernel_size=(1, 1))
+        self.point_attn = SEModule(
+            in_channels=dim, r=16, activ_func="ReLU", importance="mean", fusion="add"
+        )
         self.active_func = nn.GELU()
         self.bn_layer = nn.BatchNorm2d(num_features=dim)
 
     def forward(self, x):
         x = self.channel_mix_layer(x)
+        x = self.point_attn(x)
         x = self.active_func(x)
         x = self.bn_layer(x)
         return x
@@ -106,7 +111,7 @@ class MixerBlock(nn.Module):
 
 
 @BACKBONES.register_module()
-class A19(nn.Module):
+class A20(nn.Module):
     def __init__(
         self,
         stage_channels: int = [96, 192, 384, 768],
@@ -226,18 +231,19 @@ def count_model_parameters(model):
     num_params = sum(p.numel() for p in params)
     return num_params
 
+
 if __name__ == "__main__":
-    m = A19(stage_channels=[256,512,1024,2048],
-            stage_blocks=[2, 2, 2, 2],
-            patch_size=[4, 2, 2, 2],
-            kernel_size=7,
-            bias=False,
-            activ_func="Sigmoid").cuda()
-    summary(m, (3, 224, 224), batch_size=64, device="cuda")
-    
-    # input_img = torch.Tensor(64, 3, 224, 224)
-    # m(input_img)
-    # flops = FlopCountAnalysis(m, input_img)
-    # print(flop_count_table(flops))
-    # formatted_number = "{:.2f}G".format(flops.total() / 1e9)
-    # print(f"total FLOPs: {formatted_number}")  # kb단위로 모델전체 FLOPs 출력해줌
+    m = A20(
+        stage_channels=[96, 192, 384, 768],
+        stage_blocks=[2, 2, 2, 2],
+        patch_size=[4, 2, 2, 2],
+        kernel_size=7,
+        bias=False,
+        activ_func="Sigmoid",
+    )
+    summary(m, (3, 224, 224), batch_size=64, device="cpu")
+    input_img = torch.Tensor(64, 3, 224, 224)
+    flops = FlopCountAnalysis(m, input_img)
+    print(flop_count_table(flops))
+    formatted_number = "{:.2f}G".format(flops.total() / 1e9)
+    print(f"total FLOPs: {formatted_number}")

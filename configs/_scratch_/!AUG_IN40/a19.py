@@ -116,7 +116,7 @@ visualizer = dict(type='UniversalVisualizer',
 log_level = 'INFO'
 load_from = None
 resume = False
-randomness = dict(seed=None, deterministic=True) # deterministic False
+randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',

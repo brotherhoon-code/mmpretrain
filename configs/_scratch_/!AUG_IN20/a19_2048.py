@@ -121,7 +121,7 @@ randomness = dict(seed=None, deterministic=True)
 model = dict(
     type='ImageClassifier',
     backbone=dict(type='A19',
-                  stage_channels=[96, 192, 384, 768],
+                  stage_channels=[256, 512, 1024, 2048],
                   stage_blocks=[2, 2, 2, 2],
                   patch_size=[4, 2, 2, 2],
                   kernel_size=7,
@@ -131,7 +131,7 @@ model = dict(
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
-        in_channels=768,
+        in_channels=2048,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
         topk=(1, 5),
     ))

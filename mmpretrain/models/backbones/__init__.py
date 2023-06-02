@@ -81,6 +81,7 @@ from .a16 import A16
 from .a17 import A17
 from .a18 import A18
 from .a19 import A19
+from .a20 import A20
 
 
 __all__ = [
@@ -172,5 +173,6 @@ __all__ = [
     'A16',
     'A17',
     'A18',
-    'A19'
+    'A19',
+    'A20'
     ]
