@@ -7,7 +7,18 @@ from torchsummary import summary
 from typing import Literal
 
 
-def get_activ_func(function_name:Literal["ReLU", "GELU", "Sigmoid", "None"]="GELU"):
+class MultipleSigmoid(nn.Module):
+    def __init__(self, scalar:float):
+        super().__init__()
+        self.activ_func = nn.Sigmoid()
+        self.scalar = scalar
+        
+    def forward(self, x):
+        x = self.scalar*self.activ_func(x)
+        return x
+
+
+def get_activ_func(function_name:Literal["ReLU", "GELU", "Sigmoid", "None", "Tanh", "Sigmoid10"]="GELU"):
     if function_name == "ReLU":
         activ_func = nn.ReLU(inplace=True)
     elif function_name == "GELU":
@@ -16,6 +27,12 @@ def get_activ_func(function_name:Literal["ReLU", "GELU", "Sigmoid", "None"]="GEL
         activ_func = nn.Sequential()
     elif function_name == "Sigmoid":
         activ_func = nn.Sigmoid()
+    elif function_name == "Sigmoid10":
+        activ_func = MultipleSigmoid(scalar=10.)
+    elif function_name == "Sigmoid30":
+        activ_func = MultipleSigmoid(scalar=30.)
+    elif function_name == "Tanh":
+        activ_func = nn.Tanh()
     else:
         raise ValueError(f"function_name = {function_name} is not registered")
     return activ_func
@@ -30,7 +47,7 @@ class SpatialSelfConv(nn.Module):
         kernel_size: int,
         hidden_dim: int,
         dropout_ratio: float = 0.2,
-        activ_func:Literal["ReLU", "GELU", "Sigmoid", "None"] = "GELU",
+        activ_func:Literal["ReLU", "GELU", "Sigmoid", "None", "Tanh"] = "GELU",
         bias:bool = False
     ):
         super().__init__()

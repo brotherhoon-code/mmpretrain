@@ -105,7 +105,7 @@ class MixerBlock(nn.Module):
         self.channel_mix_block = ChannelMixBlock(dim)
 
     def forward(self, x):
-        x = self.spatial_mix_block(x) + x  # delete skip conn
+        x = self.spatial_mix_block(x) + x
         x = self.channel_mix_block(x)
         return x
 
