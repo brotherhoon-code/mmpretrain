@@ -9,7 +9,7 @@ from fvcore.nn import FlopCountAnalysis, flop_count_table
 from mmpretrain.models.backbones.custom_modules.selfconv import SpatialSelfConv
 from mmpretrain.models.backbones.custom_modules.attention import SEModule
 
-from ..builder import BACKBONES
+# from ..builder import BACKBONES
 
 
 class PatchEmbedBlock(nn.Module):
@@ -110,7 +110,7 @@ class MixerBlock(nn.Module):
         return x
 
 
-@BACKBONES.register_module()
+# @BACKBONES.register_module()
 class A20(nn.Module):
     def __init__(
         self,

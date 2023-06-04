@@ -2,8 +2,8 @@
 BATCH_SIZE = 64
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 100
-VAL_INTERVAL = 5
-N_CLASSES = 20
+VAL_INTERVAL = 1
+N_CLASSES = 40
 
 dataset_type = 'ImageNet'
 
@@ -39,8 +39,8 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/train_20.txt',
-        data_prefix='train_20',
+        ann_file='meta/train_40.txt',
+        data_prefix='train_40',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
@@ -51,8 +51,8 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root='data/imagenet',
-        ann_file='meta/val_20.txt',
-        data_prefix='val_20',
+        ann_file='meta/val_40.txt',
+        data_prefix='val_40',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
@@ -111,12 +111,12 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='!AUG_IN20', # check
+                                           project='!AUG_IN40', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
 resume = False
-randomness = dict(seed=None, deterministic=False)
+randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',

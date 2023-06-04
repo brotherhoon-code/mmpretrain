@@ -7,7 +7,7 @@ from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
 from mmpretrain.models.backbones.custom_modules.selfconv import SpatialSelfConv
-from mmpretrain.models.backbones.custom_modules.ODConv import Channel_ODconv
+from mmpretrain.models.backbones.custom_modules.attention import SEModule
 
 from ..builder import BACKBONES
 
@@ -69,12 +69,16 @@ class ChannelMixBlock(nn.Module):
     def __init__(self, dim: int):
         super(ChannelMixBlock, self).__init__()
         self.dim = dim
-        self.channel_mix_layer = Channel_ODconv(dim, dim, 1)
+        self.channel_mix_layer = nn.Conv2d(dim, dim, kernel_size=(1, 1))
+        self.point_attn = SEModule(
+            in_channels=dim, r=16, activ_func="ReLU", importance="mean", fusion="add"
+        )
         self.active_func = nn.GELU()
         self.bn_layer = nn.BatchNorm2d(num_features=dim)
 
     def forward(self, x):
         x = self.channel_mix_layer(x)
+        x = self.point_attn(x)
         x = self.active_func(x)
         x = self.bn_layer(x)
         return x
@@ -95,13 +99,15 @@ class MixerBlock(nn.Module):
         super(MixerBlock, self).__init__()
         self.dim = dim
         self.kernel_size = kernel_size
+        self.proj = nn.Conv2d(in_channels=dim, out_channels=dim, kernel_size=1, bias=False)
         self.spatial_mix_block = SpatialMixBlock(
             batch, channel, height, width, kernel_size, dim, bias, activ_func
         )
         self.channel_mix_block = ChannelMixBlock(dim)
 
     def forward(self, x):
-        x = self.spatial_mix_block(x) + x  # delete skip conn
+        x = self.proj(x)
+        x = self.spatial_mix_block(x) + x
         x = self.channel_mix_block(x)
         return x
 
@@ -235,7 +241,7 @@ if __name__ == "__main__":
         patch_size=[4, 2, 2, 2],
         kernel_size=7,
         bias=False,
-        activ_func="Sigmoid",
+        activ_func="Sigmoid10",
     )
     summary(m, (3, 224, 224), batch_size=64, device="cpu")
     input_img = torch.Tensor(64, 3, 224, 224)

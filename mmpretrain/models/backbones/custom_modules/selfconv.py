@@ -29,6 +29,8 @@ def get_activ_func(function_name:Literal["ReLU", "GELU", "Sigmoid", "None", "Tan
         activ_func = nn.Sigmoid()
     elif function_name == "Sigmoid10":
         activ_func = MultipleSigmoid(scalar=10.)
+    elif function_name == "Sigmoid20":
+        activ_func = MultipleSigmoid(scalar=20.)
     elif function_name == "Sigmoid30":
         activ_func = MultipleSigmoid(scalar=30.)
     elif function_name == "Tanh":
