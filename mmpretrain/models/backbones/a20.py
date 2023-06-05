@@ -9,7 +9,7 @@ from fvcore.nn import FlopCountAnalysis, flop_count_table
 from mmpretrain.models.backbones.custom_modules.selfconv import SpatialSelfConv
 from mmpretrain.models.backbones.custom_modules.attention import SEModule
 
-# from ..builder import BACKBONES
+from ..builder import BACKBONES
 
 
 class PatchEmbedBlock(nn.Module):
@@ -110,7 +110,7 @@ class MixerBlock(nn.Module):
         return x
 
 
-# @BACKBONES.register_module()
+@BACKBONES.register_module()
 class A20(nn.Module):
     def __init__(
         self,
@@ -119,7 +119,7 @@ class A20(nn.Module):
         patch_size: int = [4, 2, 2, 2],
         kernel_size: int = 7,
         bias=False,
-        activ_func="Sigmoid",
+        activ_func="Tanh",
     ):
         super().__init__()
         self.s1_patch_embed = PatchEmbedBlock(
@@ -239,7 +239,7 @@ if __name__ == "__main__":
         patch_size=[4, 2, 2, 2],
         kernel_size=7,
         bias=False,
-        activ_func="Sigmoid",
+        activ_func="Tanh",
     )
     summary(m, (3, 224, 224), batch_size=64, device="cpu")
     input_img = torch.Tensor(64, 3, 224, 224)

@@ -6,6 +6,16 @@ from einops import rearrange
 from torchsummary import summary
 from typing import Literal
 
+class MultipleTanh(nn.Module):
+    def __init__(self, scalar:float=1.0, temperature:float=1.0):
+        super().__init__()
+        self.activ_func = nn.Tanh()
+        self.scalar = scalar
+        self.temp = temperature
+        
+    def forward(self, x):
+        x = self.scalar * self.activ_func(x/self.temp)
+        return x
 
 class MultipleSigmoid(nn.Module):
     def __init__(self, scalar:float):
@@ -18,7 +28,7 @@ class MultipleSigmoid(nn.Module):
         return x
 
 
-def get_activ_func(function_name:Literal["ReLU", "GELU", "Sigmoid", "None", "Tanh", "Sigmoid10"]="GELU"):
+def get_activ_func(function_name:str="GELU"):
     if function_name == "ReLU":
         activ_func = nn.ReLU(inplace=True)
     elif function_name == "GELU":
@@ -34,7 +44,11 @@ def get_activ_func(function_name:Literal["ReLU", "GELU", "Sigmoid", "None", "Tan
     elif function_name == "Sigmoid30":
         activ_func = MultipleSigmoid(scalar=30.)
     elif function_name == "Tanh":
-        activ_func = nn.Tanh()
+        activ_func = MultipleTanh(scalar=1.0, temperature=1.0)
+    elif function_name == "Tanh10":
+        activ_func = MultipleTanh(scalar=10., temperature=10.)
+    elif function_name == "Tanh100":
+        activ_func = MultipleTanh(scalar=100., temperature=10.0)
     else:
         raise ValueError(f"function_name = {function_name} is not registered")
     return activ_func
@@ -49,7 +63,7 @@ class SpatialSelfConv(nn.Module):
         kernel_size: int,
         hidden_dim: int,
         dropout_ratio: float = 0.2,
-        activ_func:Literal["ReLU", "GELU", "Sigmoid", "None", "Tanh"] = "GELU",
+        activ_func:str = "GELU",
         bias:bool = False
     ):
         super().__init__()
@@ -94,7 +108,6 @@ class SpatialSelfConv(nn.Module):
             padding=int(self.kernel_size // 2),
             groups=C * B,
         )
-        
         out = out.view(B, C, H, W)
         return out
     
