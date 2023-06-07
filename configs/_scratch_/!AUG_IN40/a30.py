@@ -120,7 +120,7 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A20',
+    backbone=dict(type='A30',
                   stage_channels=[96, 192, 384, 768],
                   stage_blocks=[2, 2, 2, 2],
                   patch_size=[4, 2, 2, 2],

@@ -1,8 +1,8 @@
 # dataset settings
 BATCH_SIZE = 64
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
-MAX_EPOCHS = 100
-VAL_INTERVAL = 1
+MAX_EPOCHS = 300
+VAL_INTERVAL = 5
 N_CLASSES = 40
 
 dataset_type = 'ImageNet'
@@ -21,14 +21,40 @@ bgr_std = data_preprocessor['std'][::-1]
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=224),
+    dict(
+        type='RandomResizedCrop',
+        scale=224,
+        backend='pillow',
+        interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(
+        type='RandAugment',
+        policies='timm_increasing',
+        num_policies=2,
+        total_level=10,
+        magnitude_level=9,
+        magnitude_std=0.5,
+        hparams=dict(
+            pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')),
+    dict(
+        type='RandomErasing',
+        erase_prob=0.25,
+        mode='rand',
+        min_area_ratio=0.02,
+        max_area_ratio=1 / 3,
+        fill_color=bgr_mean,
+        fill_std=bgr_std),
     dict(type='PackInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='ResizeEdge', scale=256, edge='short'),
+    dict(
+        type='ResizeEdge',
+        scale=256,
+        edge='short',
+        backend='pillow',
+        interpolation='bicubic'),
     dict(type='CenterCrop', crop_size=224),
     dict(type='PackInputs'),
 ]
@@ -62,16 +88,26 @@ val_evaluator = dict(type='Accuracy', topk=(1, 5))
 test_dataloader = val_dataloader
 test_evaluator = val_evaluator
 
-# lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
+# for batch in each gpu is 128, 8 gpu
+# lr = 5e-4 * 128 * 8 / 512 = 0.001
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
-        lr= LEARNING_RATE, # 0.045789 
+        lr=LEARNING_RATE,
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
     clip_grad=dict(max_norm=5.0)
 )
+
 
 # learning policy
 param_scheduler = [
@@ -92,6 +128,7 @@ val_cfg = dict()
 test_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
+
 default_scope = 'mmpretrain'
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
@@ -111,7 +148,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='!AUG_IN40', # check
+                                           project='AUG_IN40', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -120,21 +157,26 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A20',
-                  stage_channels=[96, 192, 384, 768],
-                  stage_blocks=[2, 2, 2, 2],
-                  patch_size=[4, 2, 2, 2],
-                  kernel_size=7,
-                  bias=False,
-                  activ_func="ReLU"),
+    backbone=dict(
+        type='SwinTransformer', arch='tiny', img_size=224, drop_path_rate=0.2),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
         in_channels=768,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
-        topk=(1, 5),
-    ))
+        init_cfg=None,  # suppress the default init_cfg of LinearClsHead.
+        loss=dict(
+            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
+        cal_acc=False),
+    init_cfg=[
+        dict(type='TruncNormal', layer='Linear', std=0.02, bias=0.),
+        dict(type='Constant', layer='LayerNorm', val=1., bias=0.)
+    ],
+    train_cfg=dict(augments=[
+        dict(type='Mixup', alpha=0.8),
+        dict(type='CutMix', alpha=1.0)
+    ]),
+)
 
 
 launcher = 'none'

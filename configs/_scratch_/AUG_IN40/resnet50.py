@@ -2,7 +2,7 @@
 BATCH_SIZE = 64
 LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 100
-VAL_INTERVAL = 1
+VAL_INTERVAL = 5
 N_CLASSES = 40
 
 dataset_type = 'ImageNet'
@@ -62,30 +62,15 @@ val_evaluator = dict(type='Accuracy', topk=(1, 5))
 test_dataloader = val_dataloader
 test_evaluator = val_evaluator
 
-# lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
+# optimizer
 optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW',
-        lr= LEARNING_RATE, # 0.045789 
-        weight_decay=0.05,
-        eps=1e-8,
-        betas=(0.9, 0.999)),
-    clip_grad=dict(max_norm=5.0)
-)
+    optimizer=dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001))
+
 
 # learning policy
-param_scheduler = [
-    # warm up learning rate scheduler
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=20,
-        # update by iter
-        convert_to_iter_based=True),
-    # main learning rate scheduler
-    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
-]
+param_scheduler = dict(
+    type='MultiStepLR', by_epoch=True, milestones=[30, 60, 90], gamma=0.1)
+
 
 train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL)
 val_cfg = dict()
@@ -111,7 +96,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='!AUG_IN40', # check
+                                           project='AUG_IN40', # check
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
@@ -120,18 +105,17 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A20',
-                  stage_channels=[96, 192, 384, 768],
-                  stage_blocks=[2, 2, 2, 2],
-                  patch_size=[4, 2, 2, 2],
-                  kernel_size=7,
-                  bias=False,
-                  activ_func="ReLU"),
+    backbone=dict(
+        type='ResNet',
+        depth=50,
+        num_stages=4,
+        out_indices=(3, ),
+        style='pytorch'),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
-        in_channels=768,
+        in_channels=2048,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
         topk=(1, 5),
     ))
