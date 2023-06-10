@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-from mmpretrain.models.backbones.custom_modules.GCconv import GCconv
+from mmpretrain.models.backbones.custom_modules.GCconv2 import GCconv2
 
 from ..builder import BACKBONES
 
@@ -34,12 +34,11 @@ class PatchEmbedBlock(nn.Module):
 class SpatialMixBlock(nn.Module):
     def __init__(
         self,
-        batch,
         kernel_size: int,
         dim: int,
     ):
         super(SpatialMixBlock, self).__init__()
-        self.spatial_mix_layer = GCconv(batch, dim, kernel_size)
+        self.spatial_mix_layer = GCconv2(in_channels=dim, out_channels=dim, kernel_size=kernel_size)
         self.active_func = nn.GELU()
         self.bn_layer = nn.BatchNorm2d(num_features=dim)
 
@@ -68,13 +67,11 @@ class ChannelMixBlock(nn.Module):
 class MixerBlock(nn.Module):
     def __init__(
         self,
-        batch,
         kernel_size: int,
         dim: int,
     ):
         super(MixerBlock, self).__init__()
         self.spatial_mix_block = SpatialMixBlock(
-            batch, 
             kernel_size, 
             dim, 
         )
@@ -87,7 +84,7 @@ class MixerBlock(nn.Module):
 
 
 @BACKBONES.register_module()
-class A30(nn.Module):
+class A31(nn.Module):
     def __init__(
         self,
         stage_channels: int = [96, 192, 384, 768],
@@ -102,7 +99,6 @@ class A30(nn.Module):
         self.stage1 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     kernel_size,
                     stage_channels[0],
                 )
@@ -118,7 +114,6 @@ class A30(nn.Module):
         self.stage2 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     kernel_size,
                     stage_channels[1],
                 )
@@ -135,7 +130,6 @@ class A30(nn.Module):
         self.stage3 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     kernel_size,
                     stage_channels[2],
                 )
@@ -151,7 +145,6 @@ class A30(nn.Module):
         self.stage4 = nn.Sequential(
             *[
                 MixerBlock(
-                    64,
                     kernel_size,
                     stage_channels[3],
                 )
@@ -187,11 +180,11 @@ def count_model_parameters(model):
 
 
 if __name__ == "__main__":
-    m = A30(
-        stage_channels=[96, 192, 384, 768],
-        stage_blocks=[3, 3, 9, 3],
+    m = A31(
+        stage_channels=[96*2, 192*2, 384*2, 768*2],
+        stage_blocks=[2, 2, 6, 2],
         patch_size=[4, 2, 2, 2],
-        kernel_size=9,
+        kernel_size=7,
     )
     if True:
         summary(m, (3, 224, 224), batch_size=64, device="cpu")

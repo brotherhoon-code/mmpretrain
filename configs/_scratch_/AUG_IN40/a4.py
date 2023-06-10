@@ -146,18 +146,16 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A20',
-                  stage_channels=[96*2, 192*2, 384*2, 768*2],
-                  stage_blocks=[3, 3, 3, 3],
+    backbone=dict(type='A4',
+                  stage_channels=[96, 192, 384, 768],
+                  stage_blocks=[3, 3, 9, 3],
                   patch_size=[4, 2, 2, 2],
-                  kernel_size=7,
-                  bias=False,
-                  activ_func="Sigmoid10"),
+                  kernel_size=7),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
-        in_channels=768*2,
+        in_channels=768,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
         topk=(1, 5),
     ))
