@@ -8,7 +8,7 @@ from typing import Literal
 
 
 class GCconv3(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, reduction=4, temperature=2.):
+    def __init__(self, in_channels, out_channels, kernel_size, reduction=4, temperature=1.):
         super().__init__()
         self.kernel_size = kernel_size
         self.in_channels = in_channels
@@ -65,7 +65,7 @@ class GCconv3(nn.Module):
         V = self._get_value(x)  # b c n
         K = self._get_key(x)  # b n c
         channel_score = torch.matmul(V, K)  # b c c
-        channel_score = F.softmax(channel_score/self.temperature, dim=1) # space 제한
+        channel_score = torch.sigmoid(channel_score/self.temperature) # space 제한
         filters = self.linear0(channel_score) # b c c//r
         filters = self.layer_norm(filters) # b c c//r
         filters = self.activ_func(filters) # b c c//r
