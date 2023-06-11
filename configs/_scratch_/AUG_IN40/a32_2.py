@@ -1,6 +1,6 @@
 # dataset settings
 BATCH_SIZE = 64
-LEARNING_RATE = 4e-3 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
+LEARNING_RATE = 5e-4 # 5e-4*BATCH_SIZE*1/512, lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 MAX_EPOCHS = 300
 VAL_INTERVAL = 5
 N_CLASSES = 40
@@ -88,24 +88,15 @@ val_evaluator = dict(type='Accuracy', topk=(1, 5))
 test_dataloader = val_dataloader
 test_evaluator = val_evaluator
 
-# for batch in each gpu is 128, 8 gpu
-# lr = 5e-4 * 128 * 8 / 512 = 0.001
+# lr = 5e-4 * 128(batch_size) * 8(n_gpu) / 512 = 0.001
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
-        lr=LEARNING_RATE,
+        lr= LEARNING_RATE, # 0.045789 
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-    clip_grad=dict(max_norm=10e1000)
+    clip_grad=dict(max_norm=5.0)
 )
 
 # learning policy
@@ -127,7 +118,6 @@ val_cfg = dict()
 test_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=BATCH_SIZE)
-
 default_scope = 'mmpretrain'
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
@@ -156,22 +146,19 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1),
+    backbone=dict(type='A32',
+                  stage_channels=[96, 192, 384, 768],
+                  stage_blocks=[3, 3, 9, 3],
+                  patch_size=[4, 2, 2, 2],
+                  kernel_size=7),
+    neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
         in_channels=768,
-        loss=dict(
-            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
-        init_cfg=None,
-    ),
-    init_cfg=dict(
-        type='TruncNormal', layer=['Conv2d', 'Linear'], std=.02, bias=0.),
-    train_cfg=dict(augments=[
-        dict(type='Mixup', alpha=0.8),
-        dict(type='CutMix', alpha=1.0),
-    ]),
-)
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        topk=(1, 5),
+    ))
 
 
 launcher = 'none'
