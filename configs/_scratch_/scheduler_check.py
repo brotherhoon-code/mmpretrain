@@ -21,15 +21,15 @@ bgr_std = data_preprocessor['std'][::-1]
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=16),
+    dict(type='RandomResizedCrop', scale=32),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='PackInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='ResizeEdge', scale=16, edge='short'),
-    dict(type='CenterCrop', crop_size=224),
+    dict(type='ResizeEdge', scale=32, edge='short'),
+    dict(type='CenterCrop', crop_size=32),
     dict(type='PackInputs'),
 ]
 
