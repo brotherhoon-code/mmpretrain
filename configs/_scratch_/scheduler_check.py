@@ -21,40 +21,14 @@ bgr_std = data_preprocessor['std'][::-1]
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='RandomResizedCrop',
-        scale=224,
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='RandomResizedCrop', scale=16),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(
-        type='RandAugment',
-        policies='timm_increasing',
-        num_policies=2,
-        total_level=10,
-        magnitude_level=9,
-        magnitude_std=0.5,
-        hparams=dict(
-            pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')),
-    dict(
-        type='RandomErasing',
-        erase_prob=0.25,
-        mode='rand',
-        min_area_ratio=0.02,
-        max_area_ratio=1 / 3,
-        fill_color=bgr_mean,
-        fill_std=bgr_std),
     dict(type='PackInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='ResizeEdge',
-        scale=256,
-        edge='short',
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='ResizeEdge', scale=16, edge='short'),
     dict(type='CenterCrop', crop_size=224),
     dict(type='PackInputs'),
 ]
@@ -110,7 +84,7 @@ param_scheduler = [
         # update by iter
         convert_to_iter_based=True),
     # main learning rate scheduler
-    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
+    # dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
 ]
 
 train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL)
@@ -123,7 +97,7 @@ default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=VAL_INTERVAL),
+    checkpoint=dict(type='CheckpointHook', interval=500),
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='VisualizationHook', enable=False)
     )
@@ -146,16 +120,12 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A36',
-                  stage_channels=[96, 192, 384, 768],
-                  stage_blocks=[3, 3, 9, 3],
-                  patch_size=[4, 2, 2, 2],
-                  kernel_size=7),
+    backbone=dict(type='Carrot'),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=N_CLASSES,
-        in_channels=768,
+        in_channels=9,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
         topk=(1, 5),
     ))

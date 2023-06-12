@@ -11,7 +11,7 @@ class Carrot(nn.Module):
     def __init__(self):
         super(Carrot, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=9, kernel_size=(3,3), padding=1)
-        self.conv2 = nn.Conv2d(in_channels=9, out_channels=1024, kernel_size=(3,3), padding=1)
+        self.conv2 = nn.Conv2d(in_channels=9, out_channels=9, kernel_size=(3,3), padding=1)
 
     # backbone에서 return 타입에 따라 다르게 해야합니다.
     # 1. tuple 타입의 경우 각 레이어에서 나오는 텐서들을 리스트로 묶고 튜플로 변환시켜 리턴해야 합니다.
