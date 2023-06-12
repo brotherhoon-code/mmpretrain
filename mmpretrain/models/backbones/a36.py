@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-from mmpretrain.models.backbones.custom_modules.SelfConv2d_0 import SelfConv2d
+from mmpretrain.models.backbones.custom_modules.SelfConv2d_3 import SelfConv2d
 
 from ..builder import BACKBONES
 
@@ -38,7 +38,9 @@ class SpatialMixBlock(nn.Module):
         dim: int,
     ):
         super(SpatialMixBlock, self).__init__()
-        self.spatial_mix_layer = SelfConv2d(in_channels=dim, out_channels=dim, kernel_size=kernel_size)
+        self.spatial_mix_layer = SelfConv2d(
+            in_channels=dim, out_channels=dim, kernel_size=kernel_size
+        )
         self.active_func = nn.GELU()
         self.bn_layer = nn.BatchNorm2d(num_features=dim)
 
@@ -72,8 +74,8 @@ class MixerBlock(nn.Module):
     ):
         super(MixerBlock, self).__init__()
         self.spatial_mix_block = SpatialMixBlock(
-            kernel_size, 
-            dim, 
+            kernel_size,
+            dim,
         )
         self.channel_mix_block = ChannelMixBlock(dim)
 
@@ -84,7 +86,7 @@ class MixerBlock(nn.Module):
 
 
 @BACKBONES.register_module()
-class A32(nn.Module):
+class A36(nn.Module):
     def __init__(
         self,
         stage_channels: int = [96, 192, 384, 768],
@@ -152,9 +154,7 @@ class A32(nn.Module):
             ]
         )
         self._initialize_weights()
-    
-    
-    
+
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -164,8 +164,6 @@ class A32(nn.Module):
             if isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-
-    
 
     def forward(self, x):
         outs = []
@@ -195,9 +193,9 @@ def count_model_parameters(model):
 
 
 if __name__ == "__main__":
-    m = A32(
-        stage_channels=[96*2, 192*2, 384*2, 768*2],
-        stage_blocks=[2, 2, 6, 2],
+    m = A36(
+        stage_channels=[96, 192, 384, 768],
+        stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
         kernel_size=7,
     )

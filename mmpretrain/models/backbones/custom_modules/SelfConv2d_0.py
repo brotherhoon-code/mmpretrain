@@ -7,7 +7,7 @@ from torchsummary import summary
 from typing import Literal
 
 
-class GCconv3(nn.Module):
+class SelfConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, reduction=4, temperature=2.):
         super().__init__()
         self.kernel_size = kernel_size
@@ -84,7 +84,7 @@ class GCconv3(nn.Module):
 
 
 if __name__ == "__main__":
-    output = GCconv3(in_channels=64, out_channels=64, kernel_size=7)(
+    output = SelfConv2d(in_channels=64, out_channels=64, kernel_size=7)(
         torch.Tensor(64, 64, 32, 32)
     )
     print(f"output.shape: {output.shape}")
