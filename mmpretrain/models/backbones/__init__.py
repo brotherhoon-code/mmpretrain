@@ -66,6 +66,7 @@ from .a1 import A1
 from .a2 import A2
 from .a3 import A3
 from .a4 import A4
+from .a4_2 import A4_2
 from .a5 import A5
 from .a6 import A6
 from .a7 import A7
@@ -167,6 +168,7 @@ __all__ = [
     'A2',
     'A3',
     'A4',
+    'A4_2',
     'A5',
     'A6',
     'A7',
