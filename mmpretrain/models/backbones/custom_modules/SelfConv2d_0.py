@@ -19,21 +19,21 @@ class SelfConv2d(nn.Module):
                 f"in_channels({in_channels}) must be same out_channels{out_channels}"
             )
 
+        self.query_layer = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            bias=False,
+        )
+        self.query_reshaper = Rearrange("b c h w -> b (h w) c")  # b n c
+
         self.key_layer = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=1,
             bias=False,
         )
-        self.key_reshaper = Rearrange("b c h w -> b (h w) c")  # b n c
-
-        self.value_layer = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=1,
-            bias=False,
-        )
-        self.value_reshaper = Rearrange("b c h w -> b c (h w)")  # b c n
+        self.key_reshaper = Rearrange("b c h w -> b c (h w)")  # b c n
 
         self.linear0 = nn.Linear(
             in_features=in_channels, out_features=int(in_channels // reduction)
@@ -50,28 +50,30 @@ class SelfConv2d(nn.Module):
         )
         self.bias = nn.Parameter(torch.zeros(out_channels))
 
-    def _get_key(self, x: torch.Tensor):
-        K = self.key_reshaper(self.key_layer(x))  # b n c
-        return K
+    def _get_query(self, x: torch.Tensor):
+        Q = self.query_reshaper(self.query_layer(x))  # b n c
+        return Q
 
-    def _get_value(self, x: torch.Tensor):
-        V = self.value_reshaper(self.value_layer(x))  # b c n
-        return V
+    def _get_key(self, x: torch.Tensor):
+        K = self.key_reshaper(self.key_layer(x))  # b c n
+        return K
 
     def forward(self, x: torch.Tensor):
         B, C, H, W = x.size()
 
         # --- make kernel --- #
-        V = self._get_value(x)  # b c n
-        K = self._get_key(x)  # b n c
-        channel_score = torch.matmul(V, K)  # b c c
-        channel_score = F.softmax(channel_score/self.temperature, dim=1) # space 제한
+        K = self._get_key(x)  # b c n
+        Q = self._get_query(x)  # b n c
+        channel_score = torch.matmul(K, Q)  # b c c
+        channel_score = F.softmax(channel_score/self.temperature, dim=1) # kernel space 제한
         filters = self.linear0(channel_score) # b c c//r
         filters = self.layer_norm(filters) # b c c//r
         filters = self.activ_func(filters) # b c c//r
         filters = self.linear1(filters) # b c kk
         filters = self.reducer(filters) # c kk
         filters = self.kernel_shaper(filters) # c 1 k k
+        
+        # --- convolution --- #
         out = F.conv2d(
             x,
             weight=filters,
