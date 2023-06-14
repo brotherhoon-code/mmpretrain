@@ -3,6 +3,7 @@ work_dir/*
 artifacts/*
 wandb/*
 *.sh
+test.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
