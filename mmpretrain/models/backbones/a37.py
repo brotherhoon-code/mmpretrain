@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-from mmpretrain.models.backbones.custom_modules.SelfConv2d_3 import SelfConv2d
+from mmpretrain.models.backbones.custom_modules.SelfConv2d_4 import SelfConv2d
 
 from ..builder import BACKBONES
 
@@ -86,13 +86,13 @@ class MixerBlock(nn.Module):
 
 
 @BACKBONES.register_module()
-class A36(nn.Module):
+class A37(nn.Module):
     def __init__(
         self,
-        stage_channels: int = [96*2, 192*2, 384*2, 768*2],
-        stage_blocks: int = [3, 3, 9, 3],
-        patch_size: int = [4, 2, 2, 2],
-        kernel_size: int = 9,
+        stage_channels: list = [96, 192, 384, 768],
+        stage_blocks: list = [2, 2, 2, 2],
+        patch_size: list = [4, 2, 2, 2],
+        kernel_size: int = 7,
     ):
         super().__init__()
         self.s1_patch_embed = PatchEmbedBlock(
@@ -193,11 +193,11 @@ def count_model_parameters(model):
 
 
 if __name__ == "__main__":
-    m = A36(
+    m = A37(
         stage_channels=[96, 192, 384, 768],
         stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
-        kernel_size=7,
+        kernel_size=9,
     )
     if True:
         summary(m, (3, 224, 224), batch_size=64, device="cpu")

@@ -91,6 +91,7 @@ from .a33 import A33
 from .a34 import A34
 from .a35 import A35
 from .a36 import A36
+from .a37 import A37
 
 
 __all__ = [
@@ -192,5 +193,6 @@ __all__ = [
     'A33',
     'A34',
     'A35',
-    'A36'
+    'A36',
+    'A37'
     ]

@@ -123,7 +123,7 @@ default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=VAL_INTERVAL),
+    checkpoint=dict(type='CheckpointHook', interval=500),
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='VisualizationHook', enable=False)
     )
@@ -146,9 +146,9 @@ randomness = dict(seed=None, deterministic=True)
 
 model = dict(
     type='ImageClassifier',
-    backbone=dict(type='A36',
+    backbone=dict(type='A4',
                   stage_channels=[96*2, 192*2, 384*2, 768*2],
-                  stage_blocks=[3, 3, 9, 3],
+                  stage_blocks=[2, 2, 6, 2],
                   patch_size=[4, 2, 2, 2],
                   kernel_size=9),
     neck=dict(type='GlobalAveragePooling'),

@@ -52,10 +52,14 @@ class SelfConv2d(nn.Module):
             Rearrange("c (kh kw) -> c 1 kh kw", kh=kernel_size, kw=kernel_size),
         )
         
-        self.point_conv0 = nn.Conv2d(in_channels=in_channels, out_channels=int(in_channels//4), kernel_size=1, bias=False)
-        self.regular_conv = nn.Conv2d(in_channels=int(in_channels//4), out_channels=int(in_channels//4), kernel_size=kernel_size, padding="same", groups=1, bias=True)
-        self.point_conv1 = nn.Conv2d(in_channels=int(in_channels//4), out_channels=out_channels, kernel_size=1, bias=False)
-
+        self.bias = nn.Parameter(torch.zeros(out_channels))
+        
+        self.dwconv = nn.Conv2d(in_channels=in_channels,
+                                out_channels=out_channels,
+                                kernel_size=kernel_size,
+                                padding="same",
+                                groups=in_channels)
+        
     def _get_query(self, x: torch.Tensor):
         K = self.q_reshaper(self.q_layer(x))  # b n c
         return K
@@ -74,13 +78,13 @@ class SelfConv2d(nn.Module):
 
         out1 = F.conv2d(
             x,weight=weights,
-            bias=None,
+            bias=self.bias,
             stride=1,
             padding=int(self.kernel_size // 2),
             groups=self.in_channels,
         )
         
-        out2 = self.point_conv1(self.regular_conv(self.point_conv0(x)))
+        out2 = self.dwconv(x)
         return (out1+out2)/2
 
 

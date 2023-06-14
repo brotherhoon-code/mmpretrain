@@ -13,9 +13,9 @@ class SelfConv2d(nn.Module):
         in_channels,
         out_channels,
         kernel_size,
-        reduction=4,
+        reduction=16,
         temperature=2.0,
-        pooling_resolution=7
+        pooling_resolution=7, # last stage의 feature_map resolution
     ):
         super().__init__()
         self.kernel_size = kernel_size
@@ -60,9 +60,7 @@ class SelfConv2d(nn.Module):
             Rearrange("c (kh kw) -> c 1 kh kw", kh=kernel_size, kw=kernel_size),
         )
         
-        self.point_conv0 = nn.Conv2d(in_channels=in_channels, out_channels=int(in_channels//4), kernel_size=1, bias=False)
-        self.regular_conv = nn.Conv2d(in_channels=int(in_channels//4), out_channels=int(in_channels//4), kernel_size=kernel_size, padding="same", groups=1, bias=True)
-        self.point_conv1 = nn.Conv2d(in_channels=int(in_channels//4), out_channels=out_channels, kernel_size=1, bias=False)
+        self.bias = nn.Parameter(torch.zeros(out_channels))
 
     def _get_query(self, x: torch.Tensor):
         x = self.q_layer(x)
@@ -78,22 +76,21 @@ class SelfConv2d(nn.Module):
 
     def forward(self, x: torch.Tensor):
         # --- make self-convolution weights --- #
-        Q = self._get_query(x)  # b c n
-        K = self._get_key(x)  # b n c
+        Q = self._get_query(x)  # b c r**2
+        K = self._get_key(x)  # b r**2 c
         channel_score = torch.matmul(Q, K)  # b c c
         channel_score = F.softmax(channel_score / self.temperature, dim=1)  # space 제한
         weights = self.fusion(channel_score)
 
-        out1 = F.conv2d(
+        out = F.conv2d(
             x,weight=weights,
-            bias=None,
+            bias=self.bias,
             stride=1,
             padding=int(self.kernel_size // 2),
             groups=self.in_channels,
         )
         
-        out2 = self.point_conv1(self.regular_conv(self.point_conv0(x)))
-        return (out1+out2)/2
+        return out
 
 
 if __name__ == "__main__":
