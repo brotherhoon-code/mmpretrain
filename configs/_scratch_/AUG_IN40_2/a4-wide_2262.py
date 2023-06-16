@@ -1,6 +1,6 @@
 # dataset settings
 BATCH_SIZE = 64
-LEARNING_RATE = 5e-4 
+LEARNING_RATE = 5e-4
 MAX_EPOCHS = 300
 VAL_INTERVAL = 1
 N_CLASSES = 40
@@ -60,7 +60,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=BATCH_SIZE*4,
+    batch_size=BATCH_SIZE,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -73,7 +73,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=BATCH_SIZE,
+    batch_size=BATCH_SIZE*4,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -121,14 +121,14 @@ train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL
 val_cfg = dict()
 test_cfg = dict()
 
-auto_scale_lr = dict(base_batch_size=1024)  # same base_batch_size swin
+auto_scale_lr = dict(base_batch_size=4096)  # same base_batch_size convnext
 
 default_scope = "mmpretrain"
 default_hooks = dict(
     timer=dict(type="IterTimerHook"),
     logger=dict(type="LoggerHook", interval=100),
     param_scheduler=dict(type="ParamSchedulerHook"),
-    checkpoint=dict(type="CheckpointHook", interval=500),
+    checkpoint=dict(type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     visualization=dict(type="VisualizationHook", enable=False),
 )
@@ -161,7 +161,7 @@ model = dict(
     backbone=dict(
         type="A4",
         stage_channels=[96 * 2, 192 * 2, 384 * 2, 768 * 2],
-        stage_blocks=[3, 3, 9, 3],
+        stage_blocks=[2, 2, 6, 2],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
     ),
@@ -173,9 +173,9 @@ model = dict(
         loss=dict(type="LabelSmoothLoss", label_smooth_val=0.1, mode="original"),
         topk=(1, 5),
     ),
-    init_cfg=dict( # initialize 추가
+    init_cfg=dict(  # initialize 추가
         type="TruncNormal", layer=["Conv2d", "Linear"], std=0.02, bias=0.0
-    ),  
+    ),
     train_cfg=dict(
         augments=[dict(type="Mixup", alpha=0.8), dict(type="CutMix", alpha=1.0)]
     ),

@@ -132,7 +132,7 @@ default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=500), # for not save
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=2, save_best="auto"), # update...
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='VisualizationHook', enable=False))
 env_cfg = dict(
