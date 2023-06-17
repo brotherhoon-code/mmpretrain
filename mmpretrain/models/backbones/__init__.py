@@ -93,6 +93,8 @@ from .a35 import A35
 from .a36 import A36
 from .a37 import A37
 
+from .b1 import B1
+
 
 __all__ = [
     'LeNet5',
@@ -194,5 +196,6 @@ __all__ = [
     'A34',
     'A35',
     'A36',
-    'A37'
+    'A37',
+    'B1'
     ]
