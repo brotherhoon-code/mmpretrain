@@ -11,15 +11,13 @@ kernel_component = "Tconv"
 """
 
 class SelfConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, temp=7.0, pooling_resolution=7, bottle_ratio=4,
-                 kernel_component="linear"):
+    def __init__(self, in_channels, out_channels, kernel_size, temp=7.0, pooling_resolution=7, bottle_ratio=4):
         super().__init__()
         self.kernel_size = kernel_size
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.temp = temp
         self.bottle_ratio=bottle_ratio
-        self.kernel_component = kernel_component
 
         if in_channels != out_channels:
             raise ValueError(
@@ -36,7 +34,7 @@ class SelfConv2d(nn.Module):
         self.k_reshaper = Rearrange("b c p_h p_w -> b (p_h p_w) c")  # b n c
         
         self.kernel_layer = nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
-                                               kernel_size=kernel_size-pooling_resolution+1)
+                                               kernel_size=kernel_size-pooling_resolution+1, groups=in_channels)
         self.kernel_reshaper = Rearrange('b c p_h p_w -> b c (p_h p_w)') # b c 49
         
         self.filter_reshaper = Rearrange('b c (k_h k_w) -> b c k_h k_w', k_h=kernel_size, k_w=kernel_size)
