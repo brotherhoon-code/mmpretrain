@@ -1,8 +1,8 @@
 BATCH_SIZE = 64
-LEARNING_RATE = 4e-3 # original setting # custom setting 1e-3 # [230620] 재실험 필요(original: 4e-3 / ours: 1e-3)  
+LEARNING_RATE = 4e-3 # original setting # custom setting 1e-3
 MAX_EPOCHS = 300
 VAL_INTERVAL = 1
-N_CLASSES = 40
+N_CLASSES = 200
 
 model = dict(
     type='ImageClassifier',
@@ -74,20 +74,20 @@ train_dataloader = dict(
     batch_size=BATCH_SIZE,
     num_workers=5,
     dataset=dict(
-        type='ImageNet',
-        data_root='data/imagenet',
-        ann_file='meta/train_40.txt',
-        data_prefix='train_40',
+        type='CustomDataset',
+        data_root='data/tiny-imagenet',
+        ann_file='',
+        data_prefix='train',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True))
 val_dataloader = dict(
     batch_size=BATCH_SIZE*4,
     num_workers=5,
     dataset=dict(
-        type='ImageNet',
-        data_root='data/imagenet',
-        ann_file='meta/val_40.txt',
-        data_prefix='val_40',
+        type='CustomDataset',
+        data_root='data/tiny-imagenet',
+        ann_file='',
+        data_prefix='val',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False))
 val_evaluator = dict(type='Accuracy', topk=(1, 5))
@@ -125,14 +125,14 @@ param_scheduler = [
 train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL)
 val_cfg = dict()
 test_cfg = dict()
-auto_scale_lr = dict(base_batch_size=4096) # 원래값 convnextT config에서는 64
+auto_scale_lr = dict(base_batch_size=4096)
 
 default_scope = 'mmpretrain'
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100),
     param_scheduler=dict(type='ParamSchedulerHook'),
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=2, save_best="auto"), # update...
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=2, save_best="auto"),
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='VisualizationHook', enable=False))
 env_cfg = dict(
@@ -145,7 +145,7 @@ visualizer = dict(type='UniversalVisualizer',
                       dict(
                           type='WandbVisBackend', 
                           init_kwargs=dict(entity='brotherhoon88',
-                                           project='AUG_IN40_2', # check
+                                           project='TinyImageNet_224_ver1',
                                            name='config_carrot-cifar100'))])
 log_level = 'INFO'
 load_from = None
