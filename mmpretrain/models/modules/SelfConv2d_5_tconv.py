@@ -34,7 +34,7 @@ class SelfConv2d(nn.Module):
         self.k_reshaper = Rearrange("b c p_h p_w -> b (p_h p_w) c")  # b n c
         
         self.kernel_layer = nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
-                                               kernel_size=kernel_size-pooling_resolution+1, groups=in_channels)
+                                               kernel_size=kernel_size-pooling_resolution+1, groups=in_channels, bias=False)
         self.kernel_reshaper = Rearrange('b c p_h p_w -> b c (p_h p_w)') # b c 49
         
         self.filter_reshaper = Rearrange('b c (k_h k_w) -> b c k_h k_w', k_h=kernel_size, k_w=kernel_size)
