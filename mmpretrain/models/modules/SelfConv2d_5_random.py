@@ -73,7 +73,7 @@ class SelfConv2d(nn.Module):
         K = self._get_key(x) # b 49 c
         
         channel_attn = torch.matmul(Q,K) # b c c
-        channel_attn = F.softmax(channel_attn/self.temp, dim=1) # b c c
+        channel_attn = F.softmax(channel_attn/self.temp, dim=2) # b c c
         
         kernel_weights = self._get_kernel(B) # b c k**2
         kernel_weights = torch.matmul(channel_attn, kernel_weights) # b c k**2

@@ -1,9 +1,11 @@
 # dataset settings
 BATCH_SIZE = 64
-LEARNING_RATE = 5e-4
 MAX_EPOCHS = 300
 VAL_INTERVAL = 1
 N_CLASSES = 40
+
+LEARNING_RATE = 5e-4
+MAX_NORM = 5.0
 
 dataset_type = "ImageNet"
 
@@ -99,7 +101,7 @@ optim_wrapper = dict(
         eps=1e-8,
         betas=(0.9, 0.999),
     ),
-    clip_grad=dict(max_norm=5.0),
+    clip_grad=dict(max_norm=MAX_NORM),
 )
 
 # learning policy

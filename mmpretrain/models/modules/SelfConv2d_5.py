@@ -41,8 +41,7 @@ class SelfConv2d(nn.Module):
         self.fusion_conv0 = nn.Conv2d(in_channels=in_channels, out_channels=in_channels//bottle_ratio, kernel_size=1)
         self.layer_norm1 = nn.LayerNorm([in_channels//bottle_ratio, kernel_size, kernel_size])
         
-        self.activ_func = nn.Sigmoid() # self.activ_func = nn.ReLU(inplace=True)
-        # [230621] ReLU → Sigmoid, 기울기 폭주로 인해서 함수 변경
+        self.activ_func = nn.ReLU(inplace=True)
         self.fusion_conv1 = nn.Conv2d(in_channels=in_channels//bottle_ratio, out_channels=out_channels, kernel_size=1)
 
     def _get_query(self, pooled_feature_map: torch.Tensor):
@@ -72,7 +71,7 @@ class SelfConv2d(nn.Module):
         K = self._get_key(x) # b 49 c
         
         channel_attn = torch.matmul(Q,K) # b c c
-        channel_attn = F.softmax(channel_attn/self.temp, dim=1) # b c c
+        channel_attn = F.softmax(channel_attn/self.temp, dim=2) # b c c
         
         kernel_weights = self._get_kernel(x) # b c k**2
         kernel_weights = torch.matmul(channel_attn, kernel_weights) # b c k**2
