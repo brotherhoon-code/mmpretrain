@@ -157,6 +157,14 @@ load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=False)
 
+'''
+==============================
+Input shape: (3, 224, 224)
+Flops: 1.768G
+Params: 13.928M
+Activation: 10.482M
+==============================
+'''
 model = dict(
     type="ImageClassifier",
     backbone=dict(

@@ -73,7 +73,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=BATCH_SIZE*4,
+    batch_size=BATCH_SIZE * 4,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -128,7 +128,9 @@ default_hooks = dict(
     timer=dict(type="IterTimerHook"),
     logger=dict(type="LoggerHook", interval=100),
     param_scheduler=dict(type="ParamSchedulerHook"),
-    checkpoint=dict(type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"),
+    checkpoint=dict(
+        type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"
+    ),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     visualization=dict(type="VisualizationHook", enable=False),
 )
@@ -156,31 +158,31 @@ log_level = "INFO"
 load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=False)
+"""
+24M, 3.1G: deep
+stage_channels=[96, 192, 384, 768]
+stage_blocks=[3, 3, 27, 3]
 
-'''
-==============================
-Input shape: (3, 224, 224)
-Flops: 1.791G
-Params: 13.94M
-Activation: 10.482M
-==============================
-'''
+24M, 3.0G: wide
+stage_channels=[128, 256, 512, 1024]
+stage_blocks=[3, 3, 9, 3]
+"""
 model = dict(
     type="ImageClassifier",
     backbone=dict(
         type="B1",
-        stage_channels=[96, 192, 384, 768],
+        stage_channels=[128, 256, 512, 1024],
         stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
         last_self_block=False,
-        self_conv_stages=[True,True,True,True]
+        self_conv_stages=[True, True, True, True],
     ),
     neck=dict(type="GlobalAveragePooling"),
     head=dict(
         type="LinearClsHead",
         num_classes=N_CLASSES,
-        in_channels=768,
+        in_channels=1024,
         loss=dict(type="LabelSmoothLoss", label_smooth_val=0.1, mode="original"),
         topk=(1, 5),
     ),

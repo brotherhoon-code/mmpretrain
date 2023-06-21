@@ -1,5 +1,5 @@
 BATCH_SIZE = 64
-LEARNING_RATE = 4e-3 # original setting # custom setting 1e-3
+LEARNING_RATE = 1e-3 # custom setting 1e-3
 MAX_EPOCHS = 300
 VAL_INTERVAL = 1
 N_CLASSES = 200

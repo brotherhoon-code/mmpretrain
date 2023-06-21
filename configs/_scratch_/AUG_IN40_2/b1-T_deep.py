@@ -1,9 +1,11 @@
 # dataset settings
 BATCH_SIZE = 64
-LEARNING_RATE = 5e-4
 MAX_EPOCHS = 300
 VAL_INTERVAL = 1
 N_CLASSES = 40
+
+LEARNING_RATE = 5e-4 # 수정
+MAX_NORM = 5.0
 
 dataset_type = "ImageNet"
 
@@ -73,7 +75,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=BATCH_SIZE*4,
+    batch_size=BATCH_SIZE * 4,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
@@ -99,7 +101,7 @@ optim_wrapper = dict(
         eps=1e-8,
         betas=(0.9, 0.999),
     ),
-    clip_grad=dict(max_norm=5.0),
+    clip_grad=dict(max_norm=MAX_NORM), # 수정
 )
 
 # learning policy
@@ -128,7 +130,9 @@ default_hooks = dict(
     timer=dict(type="IterTimerHook"),
     logger=dict(type="LoggerHook", interval=100),
     param_scheduler=dict(type="ParamSchedulerHook"),
-    checkpoint=dict(type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"),
+    checkpoint=dict(
+        type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"
+    ),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     visualization=dict(type="VisualizationHook", enable=False),
 )
@@ -156,25 +160,25 @@ log_level = "INFO"
 load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=False)
+"""
+24M, 3.1G: deep
+stage_channels=[96, 192, 384, 768]
+stage_blocks=[3, 3, 27, 3]
 
-'''
-==============================
-Input shape: (3, 224, 224)
-Flops: 1.791G
-Params: 13.94M
-Activation: 10.482M
-==============================
-'''
+24M, 3.0G: wide
+stage_channels=[128, 256, 512, 1024]
+stage_blocks=[3, 3, 9, 3]
+"""
 model = dict(
     type="ImageClassifier",
     backbone=dict(
         type="B1",
         stage_channels=[96, 192, 384, 768],
-        stage_blocks=[3, 3, 9, 3],
+        stage_blocks=[3, 3, 27, 3],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
         last_self_block=False,
-        self_conv_stages=[True,True,True,True]
+        self_conv_stages=[True, True, True, True],
     ),
     neck=dict(type="GlobalAveragePooling"),
     head=dict(

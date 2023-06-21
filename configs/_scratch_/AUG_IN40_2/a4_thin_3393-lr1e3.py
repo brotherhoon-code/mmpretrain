@@ -1,6 +1,6 @@
 # dataset settings
 BATCH_SIZE = 64
-LEARNING_RATE = 5e-4
+LEARNING_RATE = 1e-3
 MAX_EPOCHS = 300
 VAL_INTERVAL = 1
 N_CLASSES = 40
@@ -157,24 +157,14 @@ load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=False)
 
-'''
-==============================
-Input shape: (3, 224, 224)
-Flops: 1.791G
-Params: 13.94M
-Activation: 10.482M
-==============================
-'''
 model = dict(
     type="ImageClassifier",
     backbone=dict(
-        type="B1",
+        type="A4",
         stage_channels=[96, 192, 384, 768],
-        stage_blocks=[3, 3, 9, 3],
+        stage_blocks=[3, 3, 9, 6],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
-        last_self_block=False,
-        self_conv_stages=[True,True,True,True]
     ),
     neck=dict(type="GlobalAveragePooling"),
     head=dict(
