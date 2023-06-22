@@ -11,7 +11,7 @@ kernel_component = "random"
 """
 
 class SelfConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, temp=7.0, pooling_resolution=7, bottle_ratio=4):
+    def __init__(self, in_channels, out_channels, kernel_size, temp=20.0, pooling_resolution=7, bottle_ratio=4):
         super().__init__()
         self.kernel_size = kernel_size
         self.in_channels = in_channels
