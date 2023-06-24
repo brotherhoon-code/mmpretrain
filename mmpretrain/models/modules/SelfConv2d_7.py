@@ -5,19 +5,30 @@ from einops.layers.torch import Rearrange, Reduce
 from einops import rearrange
 from torchsummary import summary
 from typing import Literal
-
 """
-59,201
+1. LN
+- channel이 아니라 height, width에서만 실시
+
+2. 유사도
+- attention과 동일한 dot similarity
+
+3. 풀링
+- 7,7 로 통일
+
+4. 퓨전
+- 퓨전 미실시
+
+※. 파라미터
+- 35,267
 """
 
 class SelfConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, temp=20.0, pooling_resolution=7, bottle_ratio=4):
+    def __init__(self, in_channels, out_channels, kernel_size, temp=20.0, pooling_resolution=7):
         super().__init__()
         self.kernel_size = kernel_size
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.temp = temp
-        self.bottle_ratio=bottle_ratio
 
         if in_channels != out_channels:
             raise ValueError(
@@ -25,7 +36,7 @@ class SelfConv2d(nn.Module):
             )
             
         self.avgpool = nn.AdaptiveAvgPool2d(output_size=(pooling_resolution, pooling_resolution))
-        self.layer_norm0 = nn.LayerNorm([in_channels, pooling_resolution, pooling_resolution])
+        self.layer_norm0 = nn.LayerNorm([pooling_resolution, pooling_resolution]) # LayerNorm을 Channel별로 독립으로 실시
         
         self.q_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, bias=False)
         self.q_reshaper = Rearrange("b c p_h p_w -> b c (p_h p_w)")  # b c 49
@@ -38,11 +49,6 @@ class SelfConv2d(nn.Module):
         
         self.filter_reshaper = Rearrange('b c (k_h k_w) -> b c k_h k_w', k_h=kernel_size, k_w=kernel_size)
         
-        self.fusion_conv0 = nn.Conv2d(in_channels=in_channels, out_channels=in_channels//bottle_ratio, kernel_size=1)
-        self.layer_norm1 = nn.LayerNorm([in_channels//bottle_ratio, kernel_size, kernel_size])
-        
-        self.activ_func = nn.ReLU(inplace=True)
-        self.fusion_conv1 = nn.Conv2d(in_channels=in_channels//bottle_ratio, out_channels=out_channels, kernel_size=1)
 
     def _get_query(self, pooled_feature_map: torch.Tensor):
         Q = self.q_layer(pooled_feature_map)
@@ -77,11 +83,6 @@ class SelfConv2d(nn.Module):
         kernel_weights = torch.matmul(channel_attn, kernel_weights) # b c k**2
         kernel_weights = self.filter_reshaper(kernel_weights)
         
-        ## fusion
-        kernel_weights = self.fusion_conv0(kernel_weights)
-        kernel_weights = self.layer_norm1(kernel_weights)
-        kernel_weights = self.activ_func(kernel_weights)
-        kernel_weights = self.fusion_conv1(kernel_weights)
         kernel_weights = Rearrange('b c k_h k_w -> (b c) 1 k_h k_w')(kernel_weights)
         
         out = F.conv2d(
@@ -119,15 +120,12 @@ def compare_modules(input, m1, m2, m3):
 
 
 if __name__ == "__main__":
-    input = torch.Tensor(64, 128, 32, 32)
+    input = torch.Tensor(64, 128, 56, 56)
     B, C, H, W = input.shape
     conv = SelfConv2d(in_channels=C, out_channels=C, kernel_size=7)
-    dw_conv = nn.Conv2d(in_channels=C, out_channels=C, kernel_size=7, 
-                              padding=7//2, groups=C)
-    r_conv = nn.Conv2d(in_channels=C, out_channels=C, kernel_size=7, 
-                              padding=7//2, groups=1)
-    
-    # compare_modules(input, conv, dw_conv, r_conv)
+    dw_conv = nn.Conv2d(in_channels=C, out_channels=C, kernel_size=7, padding=7//2, groups=C)
+    r_conv = nn.Conv2d(in_channels=C, out_channels=C, kernel_size=7, padding=7//2, groups=1)
+    compare_modules(input, conv, dw_conv, r_conv)
     summary(conv, (128, 56, 56), batch_size=64, device='cpu')
 
 
