@@ -166,14 +166,14 @@ randomness = dict(seed=None, deterministic=False)
 model = dict(
     type="ImageClassifier",
     backbone=dict(
-        type="B1",
+        type="B4",
         stage_channels=[128, 256, 512, 1024],
         stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
         last_self_block=False,
         self_conv_stages=[True, True, True, True],
-        temp=40.0
+        temp=80.0
     ),
     neck=dict(type="GlobalAveragePooling"),
     head=dict(

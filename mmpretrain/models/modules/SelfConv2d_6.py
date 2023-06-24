@@ -6,8 +6,9 @@ from einops import rearrange
 from torchsummary import summary
 from typing import Literal
 """
-pooling -> point conv
-kernel_component = "linear" # "random", "Tconv"
+SelfConv2d_5 대비 다른점
+* Layernorm을 each channel별로 수행(왜냐하면, 체널까지 LN에 넣을경우 파라미터의 증가가 과함)
+* projection -> 풀링
 """
 
 class SelfConv2d(nn.Module):
@@ -23,9 +24,22 @@ class SelfConv2d(nn.Module):
             raise ValueError(
                 f"in_channels({in_channels}) must be same out_channels{out_channels}"
             )
-            
+        
+        if in_channels == 128:
+            norm_resolution = 56
+            pass
+        elif in_channels == 256:
+            norm_resolution = 28
+            pass
+        elif in_channels == 512:
+            norm_resolution = 14
+            pass
+        elif in_channels == 1024:
+            norm_resolution = 7
+            pass
+        
+        self.layer_norm0 = nn.LayerNorm([norm_resolution, norm_resolution]) # feature map norm
         self.avgpool = nn.AdaptiveAvgPool2d(output_size=(pooling_resolution, pooling_resolution))
-        self.layer_norm0 = nn.LayerNorm([in_channels, pooling_resolution, pooling_resolution])
         
         self.q_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, bias=False)
         self.q_reshaper = Rearrange("b c p_h p_w -> b c (p_h p_w)")  # b c 49
@@ -44,13 +58,15 @@ class SelfConv2d(nn.Module):
         self.activ_func = nn.ReLU(inplace=True)
         self.fusion_conv1 = nn.Conv2d(in_channels=in_channels//bottle_ratio, out_channels=out_channels, kernel_size=1)
 
-    def _get_query(self, pooled_feature_map: torch.Tensor):
-        Q = self.q_layer(pooled_feature_map)
+    def _get_query(self, x: torch.Tensor):
+        Q = self.q_layer(x)
+        Q = self.avgpool(Q)
         Q = self.q_reshaper(Q) # b c n
         return Q
 
-    def _get_key(self, pooled_feature_map: torch.Tensor):
-        K = self.k_layer(pooled_feature_map)
+    def _get_key(self, x: torch.Tensor):
+        K = self.k_layer(x)
+        K = self.avgpool(K)
         K = self.k_reshaper(K) # b n c
         return K
     
@@ -64,7 +80,6 @@ class SelfConv2d(nn.Module):
         input = x
         B, C, _, _ = input.size()
         
-        x = self.avgpool(x) # b c 7 7
         x = self.layer_norm0(x)
         
         Q = self._get_query(x) # b c 49
@@ -73,6 +88,7 @@ class SelfConv2d(nn.Module):
         channel_attn = torch.matmul(Q,K) # b c c
         channel_attn = F.softmax(channel_attn/self.temp, dim=2) # b c c
         
+        x = self.avgpool(x) # b c 7 7
         kernel_weights = self._get_kernel(x) # b c k**2
         kernel_weights = torch.matmul(channel_attn, kernel_weights) # b c k**2
         kernel_weights = self.filter_reshaper(kernel_weights)

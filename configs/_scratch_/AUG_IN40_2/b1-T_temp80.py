@@ -173,7 +173,7 @@ model = dict(
         kernel_size=9,
         last_self_block=False,
         self_conv_stages=[True, True, True, True],
-        temp=40.0
+        temp=80.0
     ),
     neck=dict(type="GlobalAveragePooling"),
     head=dict(

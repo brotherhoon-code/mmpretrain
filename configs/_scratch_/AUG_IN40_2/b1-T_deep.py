@@ -161,13 +161,7 @@ load_from = None
 resume = False
 randomness = dict(seed=None, deterministic=False)
 """
-24M, 3.1G: deep
-stage_channels=[96, 192, 384, 768]
-stage_blocks=[3, 3, 27, 3]
-
-24M, 3.0G: wide
-stage_channels=[128, 256, 512, 1024]
-stage_blocks=[3, 3, 9, 3]
+...
 """
 model = dict(
     type="ImageClassifier",
