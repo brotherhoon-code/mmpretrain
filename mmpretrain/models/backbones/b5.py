@@ -6,7 +6,7 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-from mmpretrain.models.modules.SelfConv2d_7 import SelfConv2d
+from mmpretrain.models.modules.SelfConv2d_5_2 import SelfConv2d
 
 from ..builder import BACKBONES
 
