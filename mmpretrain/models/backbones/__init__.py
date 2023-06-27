@@ -98,6 +98,7 @@ from .b2 import B2
 from .b3 import B3
 from .b4 import B4
 from .b5 import B5
+from .b6 import B6
 
 
 __all__ = [
@@ -205,5 +206,6 @@ __all__ = [
     'B2',
     'B3',
     'B4',
-    'B5'
+    'B5',
+    'B6'
     ]

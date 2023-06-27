@@ -11,11 +11,12 @@ from typing import Literal
 """
 
 class SelfConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, temp=20.0, pooling_resolution=7, bottle_ratio=4):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, temp=20.0, pooling_resolution=7, bottle_ratio=4):
         super().__init__()
         self.kernel_size = kernel_size
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.stride = stride
         self.temp = temp
         self.bottle_ratio=bottle_ratio
 
@@ -88,7 +89,7 @@ class SelfConv2d(nn.Module):
             Rearrange('b c h w -> 1 (b c) h w')(input),
             weight=kernel_weights,
             bias=None,
-            stride=1,
+            stride=self.stride,
             padding=int(self.kernel_size // 2),
             groups=x.size(0)*x.size(1),
         )
