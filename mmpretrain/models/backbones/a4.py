@@ -85,8 +85,8 @@ class MixerBlock(nn.Module):
 @BACKBONES.register_module()
 class A4(nn.Module):
     def __init__(self,
-                 stage_channels: int=[96, 192, 384, 768],
-                 stage_blocks: int=[2, 2, 2, 2],
+                 stage_channels: int=[128, 256, 512, 1024],
+                 stage_blocks: int=[3, 3, 9, 3],
                  patch_size: int=[4, 2, 2, 2],
                  kernel_size: int=7):
         super().__init__()
@@ -126,9 +126,9 @@ class A4(nn.Module):
 if __name__ == "__main__":
     m = A4()
     input_img = torch.Tensor(1, 3, 224, 224)
-    flops = FlopCountAnalysis(m, input_img)
+    # flops = FlopCountAnalysis(m, input_img)
 
     summary(m, (3, 224, 224), batch_size=256, device="cpu") # torchsummary
-    print(flop_count_table(flops)) # 테이블 형태로 각 연산하는 모듈마다 출력해주고, 전체도 출력해줌
-    formatted_number = "{:.2f}G".format(flops.total() / 1e9)
-    print(f"total FLOPs: {formatted_number}") # kb단위로 모델전체 FLOPs 출력해줌
+    # print(flop_count_table(flops)) # 테이블 형태로 각 연산하는 모듈마다 출력해주고, 전체도 출력해줌
+    # formatted_number = "{:.2f}G".format(flops.total() / 1e9)
+    # print(f"total FLOPs: {formatted_number}") # kb단위로 모델전체 FLOPs 출력해줌

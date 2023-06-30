@@ -6,7 +6,8 @@ from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange, Reduce
 from thop import profile
 from fvcore.nn import FlopCountAnalysis, flop_count_table
-from mmpretrain.models.modules.SelfConv2d_5_random import SelfConv2d
+from mmpretrain.models.modules.SelfDWConv2d_1 import SelfDWConv2d
+
 from ..builder import BACKBONES
 
 
@@ -31,28 +32,27 @@ class PatchEmbedBlock(nn.Module):
 
 
 class SpatialMixBlock(nn.Module):
-    def __init__(
-        self,
-        kernel_size: int,
-        dim: int,
-        is_self: bool
-    ):
+    def __init__(self, kernel_size: int, dim: int, is_self: bool, **kwargs):
         super(SpatialMixBlock, self).__init__()
         if is_self == True:
-            self.spatial_mix_layer = SelfConv2d(
-                in_channels=dim, out_channels=dim, kernel_size=kernel_size
+            self.spatial_mix_layer = SelfDWConv2d(
+                in_channels=dim,
+                out_channels=dim,
+                kernel_size=kernel_size,
             )
         else:
             self.spatial_mix_layer = nn.Conv2d(
-            in_channels=dim,
-            out_channels=dim,
-            kernel_size=kernel_size,
-            groups=dim,
-            padding="same")
-        
+                in_channels=dim,
+                out_channels=dim,
+                kernel_size=kernel_size,
+                groups=dim,
+                padding="same",
+            )
+
         self.active_func = nn.GELU()
         self.bn_layer = nn.BatchNorm2d(num_features=dim)
         self.dim = dim
+
     def forward(self, x):
         x = self.spatial_mix_layer(x)
         x = self.active_func(x)
@@ -76,18 +76,9 @@ class ChannelMixBlock(nn.Module):
 
 
 class MixerBlock(nn.Module):
-    def __init__(
-        self,
-        kernel_size: int,
-        dim: int,
-        is_self: bool = False
-    ):
+    def __init__(self, kernel_size: int, dim: int, is_self: bool = False, **kwargs):
         super(MixerBlock, self).__init__()
-        self.spatial_mix_block = SpatialMixBlock(
-            kernel_size,
-            dim,
-            is_self
-        )
+        self.spatial_mix_block = SpatialMixBlock(kernel_size, dim, is_self, **kwargs)
         self.channel_mix_block = ChannelMixBlock(dim)
 
     def forward(self, x):
@@ -100,64 +91,172 @@ class MixerBlock(nn.Module):
 class B3(nn.Module):
     def __init__(
         self,
-        stage_channels: list = [96*2, 192*2, 384*2, 768*2],
+        stage_channels: list = [96 * 2, 192 * 2, 384 * 2, 768 * 2],
         stage_blocks: list = [2, 2, 6, 2],
         patch_size: list = [4, 2, 2, 2],
         kernel_size: int = 9,
         last_self_block: bool = False,
-        self_conv_stages:list = [True, False, False, False],
+        self_conv_stages: list = [True, False, False, False],
     ):
         super().__init__()
 
         if (last_self_block == True) and (self_conv_stages != None):
-            raise ValueError(f"if last_self_block is True, self_conv_stages must be None")
+            raise ValueError(
+                f"if last_self_block is True, self_conv_stages must be None"
+            )
         if self_conv_stages is None:
             self_conv_stages = [False, False, False, False]
-        
+
         ## s1
-        self.s1_patch_embed = PatchEmbedBlock(in_channels=3, out_channels=stage_channels[0], patch_size=patch_size[0])
-        
+        self.s1_patch_embed = PatchEmbedBlock(
+            in_channels=3, out_channels=stage_channels[0], patch_size=patch_size[0]
+        )
+
         if last_self_block == False:
-            self.stage1 = nn.Sequential(*[MixerBlock(kernel_size, stage_channels[0], is_self=self_conv_stages[0]) 
-                                          for _ in range(stage_blocks[0])])
+            self.stage1 = nn.Sequential(
+                *[
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[0],
+                        is_self=self_conv_stages[0],
+                    )
+                    for _ in range(stage_blocks[0])
+                ]
+            )
         else:
-            blocks = [MixerBlock(kernel_size,stage_channels[0],is_self=False) for _ in range(stage_blocks[0]-1)]
-            blocks.extend([MixerBlock(kernel_size,stage_channels[0],is_self=True)])
+            blocks = [
+                MixerBlock(
+                    kernel_size,
+                    stage_channels[0],
+                    is_self=False,
+                )
+                for _ in range(stage_blocks[0] - 1)
+            ]
+            blocks.extend(
+                [
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[0],
+                        is_self=True,
+                    )
+                ]
+            )
             self.stage1 = nn.Sequential(*blocks)
 
         ## s2
-        self.s2_patch_embed = PatchEmbedBlock(in_channels=stage_channels[0], out_channels=stage_channels[1], patch_size=patch_size[1])
-        
+        self.s2_patch_embed = PatchEmbedBlock(
+            in_channels=stage_channels[0],
+            out_channels=stage_channels[1],
+            patch_size=patch_size[1],
+        )
+
         if last_self_block == False:
-            self.stage2 = nn.Sequential(*[MixerBlock(kernel_size, stage_channels[1], is_self=self_conv_stages[1]) 
-                                          for _ in range(stage_blocks[1])])
+            self.stage2 = nn.Sequential(
+                *[
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[1],
+                        is_self=self_conv_stages[1],
+                    )
+                    for _ in range(stage_blocks[1])
+                ]
+            )
         else:
-            blocks = [MixerBlock(kernel_size,stage_channels[1],is_self=False) for _ in range(stage_blocks[1]-1)]
-            blocks.extend([MixerBlock(kernel_size,stage_channels[1],is_self=True)])
+            blocks = [
+                MixerBlock(
+                    kernel_size,
+                    stage_channels[1],
+                    is_self=False,
+                )
+                for _ in range(stage_blocks[1] - 1)
+            ]
+            blocks.extend(
+                [
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[1],
+                        is_self=True,
+                    )
+                ]
+            )
             self.stage2 = nn.Sequential(*blocks)
 
         ## s3
-        self.s3_patch_embed = PatchEmbedBlock(in_channels=stage_channels[1], out_channels=stage_channels[2], patch_size=patch_size[2])
+        self.s3_patch_embed = PatchEmbedBlock(
+            in_channels=stage_channels[1],
+            out_channels=stage_channels[2],
+            patch_size=patch_size[2],
+        )
 
         if last_self_block == False:
-            self.stage3 = nn.Sequential(*[MixerBlock(kernel_size, stage_channels[2], is_self=self_conv_stages[2]) 
-                                          for _ in range(stage_blocks[2])])
+            self.stage3 = nn.Sequential(
+                *[
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[2],
+                        is_self=self_conv_stages[2],
+                    )
+                    for _ in range(stage_blocks[2])
+                ]
+            )
         else:
-            blocks = [MixerBlock(kernel_size, stage_channels[2], is_self=False) for _ in range(stage_blocks[2]-1)]
-            blocks.extend([MixerBlock(kernel_size,stage_channels[2], is_self=True)])
+            blocks = [
+                MixerBlock(
+                    kernel_size,
+                    stage_channels[2],
+                    is_self=False,
+                )
+                for _ in range(stage_blocks[2] - 1)
+            ]
+            blocks.extend(
+                [
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[2],
+                        is_self=True,
+                    )
+                ]
+            )
             self.stage3 = nn.Sequential(*blocks)
 
         ## s4
-        self.s4_patch_embed = PatchEmbedBlock(in_channels=stage_channels[2], out_channels=stage_channels[3], patch_size=patch_size[3])
-        
+        self.s4_patch_embed = PatchEmbedBlock(
+            in_channels=stage_channels[2],
+            out_channels=stage_channels[3],
+            patch_size=patch_size[3],
+        )
+
         if last_self_block == False:
-            self.stage4 = nn.Sequential(*[MixerBlock(kernel_size, stage_channels[3], is_self=self_conv_stages[3]) 
-                                          for _ in range(stage_blocks[3])])
+            self.stage4 = nn.Sequential(
+                *[
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[3],
+                        is_self=self_conv_stages[3],
+                    )
+                    for _ in range(stage_blocks[3])
+                ]
+            )
         else:
-            blocks = [MixerBlock(kernel_size, stage_channels[3], is_self=False) for _ in range(stage_blocks[3]-1)]
-            blocks.extend([MixerBlock(kernel_size,stage_channels[3], is_self=True)])
+            blocks = [
+                MixerBlock(
+                    kernel_size,
+                    stage_channels[3],
+                    is_self=False,
+                )
+                for _ in range(stage_blocks[3] - 1)
+            ]
+            blocks.extend(
+                [
+                    MixerBlock(
+                        kernel_size,
+                        stage_channels[3],
+                        is_self=True,
+                    )
+                ]
+            )
             self.stage4 = nn.Sequential(*blocks)
-            
+
         self._initialize_weights()
 
     def _initialize_weights(self):
@@ -199,19 +298,19 @@ def count_model_parameters(model):
 
 if __name__ == "__main__":
     m = B3(
-        stage_channels=[96 * 2, 192 * 2, 384 * 2, 768 * 2],
-        stage_blocks=[2, 2, 6, 2],
+        stage_channels=[128, 256, 512, 1024],
+        stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
-        kernel_size=9,
+        kernel_size=7,
         last_self_block=False,
-        self_conv_stages=[False, False, False, False]
+        self_conv_stages=[True, True, True, True],
     )
-    
+
     if True:
         summary(m, (3, 224, 224), batch_size=1, device="cpu")
-    # if True:
-    #     input_img = torch.Tensor(64, 3, 224, 224)
-    #     flops = FlopCountAnalysis(m, input_img)
-    #     print(flop_count_table(flops))
-    #     formatted_number = "{:.2f}G".format(flops.total() / 1e9)
-    #     print(f"total FLOPs: {formatted_number}")
+    if False:
+        input_img = torch.Tensor(64, 3, 224, 224)
+        flops = FlopCountAnalysis(m, input_img)
+        print(flop_count_table(flops))
+        formatted_number = "{:.2f}G".format(flops.total() / 1e9)
+        print(f"total FLOPs: {formatted_number}")

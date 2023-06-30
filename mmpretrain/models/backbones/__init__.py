@@ -96,9 +96,6 @@ from .a37 import A37
 from .b1 import B1
 from .b2 import B2
 from .b3 import B3
-from .b4 import B4
-from .b5 import B5
-from .b6 import B6
 
 
 __all__ = [
@@ -204,8 +201,5 @@ __all__ = [
     'A37',
     'B1',
     'B2',
-    'B3',
-    'B4',
-    'B5',
-    'B6'
+    'B3'
     ]

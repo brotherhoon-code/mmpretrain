@@ -172,20 +172,20 @@ stage_blocks=[3, 3, 9, 3]
 model = dict(
     type="ImageClassifier",
     backbone=dict(
-        type="B1",
+        type="B3",
         stage_channels=[128, 256, 512, 1024],
         stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
         last_self_block=False,
         self_conv_stages=[True, True, True, True],
-        temp=20.0
     ),
     neck=dict(type="GlobalAveragePooling"),
     head=dict(
         type="LinearClsHead",
         num_classes=N_CLASSES,
         in_channels=1024,
+        # loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
         loss=dict(type="LabelSmoothLoss", label_smooth_val=0.1, mode="original"),
         topk=(1, 5),
     ),

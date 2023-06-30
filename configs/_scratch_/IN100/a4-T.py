@@ -1,9 +1,10 @@
 # dataset settings
 BATCH_SIZE = 128
-LEARNING_RATE = 5e-4
-MAX_EPOCHS = 300
+MAX_EPOCHS = 100
 VAL_INTERVAL = 1
-N_CLASSES = 40
+N_CLASSES = 100
+LEARNING_RATE = 1e-3  # 5e-4 -> 1e-3
+MAX_NORM = 5.0
 
 dataset_type = "ImageNet"
 
@@ -65,21 +66,21 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root="data/imagenet",
-        ann_file="meta/train_40.txt",
-        data_prefix="train_40",
+        ann_file="meta/train_100.txt",
+        data_prefix="train_100",
         pipeline=train_pipeline,
     ),
     sampler=dict(type="DefaultSampler", shuffle=True),
 )
 
 val_dataloader = dict(
-    batch_size=BATCH_SIZE*4,
+    batch_size=BATCH_SIZE * 4,
     num_workers=5,
     dataset=dict(
         type=dataset_type,
         data_root="data/imagenet",
-        ann_file="meta/val_40.txt",
-        data_prefix="val_40",
+        ann_file="meta/val_100.txt",
+        data_prefix="val_100",
         pipeline=test_pipeline,
     ),
     sampler=dict(type="DefaultSampler", shuffle=False),
@@ -99,7 +100,7 @@ optim_wrapper = dict(
         eps=1e-8,
         betas=(0.9, 0.999),
     ),
-    clip_grad=dict(max_norm=5.0),
+    clip_grad=dict(max_norm=MAX_NORM),
 )
 
 # learning policy
@@ -128,7 +129,9 @@ default_hooks = dict(
     timer=dict(type="IterTimerHook"),
     logger=dict(type="LoggerHook", interval=100),
     param_scheduler=dict(type="ParamSchedulerHook"),
-    checkpoint=dict(type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"),
+    checkpoint=dict(
+        type="CheckpointHook", interval=1, max_keep_ckpts=2, save_best="auto"
+    ),
     sampler_seed=dict(type="DistSamplerSeedHook"),
     visualization=dict(type="VisualizationHook", enable=False),
 )
@@ -146,7 +149,7 @@ visualizer = dict(
             type="WandbVisBackend",
             init_kwargs=dict(
                 entity="brotherhoon88",
-                project="AUG_IN40_2",  # check
+                project="IN100",  # check
                 name="config_carrot-cifar100",
             ),
         )
@@ -162,7 +165,7 @@ model = dict(
     backbone=dict(
         type="A4",
         stage_channels=[128, 256, 512, 1024],
-        stage_blocks=[3, 3, 9, 6],
+        stage_blocks=[3, 3, 9, 3],
         patch_size=[4, 2, 2, 2],
         kernel_size=9,
     ),

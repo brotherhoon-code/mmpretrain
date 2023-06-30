@@ -1,7 +1,7 @@
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-3 # original setting # custom setting 1e-3 
 # [230620] 재실험 필요(original: 4e-3 / ours: 1e-3)  
-# [230620] lr:4e-3 사용시 모델 불량 1e-3으로 변경
+# [230620] lr:4e-3 사용시 학습붕괴 1e-3으로 변경
 MAX_EPOCHS = 100
 VAL_INTERVAL = 1
 N_CLASSES = 100
