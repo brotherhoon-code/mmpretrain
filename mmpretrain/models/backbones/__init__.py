@@ -54,49 +54,6 @@ from .vig import PyramidVig, Vig
 from .vision_transformer import VisionTransformer
 from .xcit import XCiT
 
-from .carrot import Carrot
-from .custom_resnet import CustomResNet
-from .custom_resnet_swinlike import SwinLikeResNet
-from .custom_resnet_swinlike_dw import SwinLikeDWResNet
-from .custom_resnet_swinlike_dw_rescale import SwinLikeRescaleDWResNet
-from .custom_resnet_swinlike_dw_odconv import ODSwinLikeDWResNet
-from .custom_convmixer import CustomConvMixer
-
-from .a1 import A1
-from .a2 import A2
-from .a3 import A3
-from .a4 import A4
-from .a4_2 import A4_2
-from .a5 import A5
-from .a6 import A6
-from .a7 import A7
-from .a8 import A8
-from .a9 import A9
-from .a10 import A10
-from .a11 import A11
-from .a12 import A12
-from .a13 import A13
-from .a14 import A14
-from .a15 import A15
-from .a16 import A16
-from .a17 import A17
-from .a18 import A18
-from .a19 import A19
-from .a20 import A20
-from .a21 import A21
-from .a30 import A30
-from .a31 import A31
-from .a32 import A32
-from .a33 import A33
-from .a34 import A34
-from .a35 import A35
-from .a36 import A36
-from .a37 import A37
-
-from .b1 import B1
-from .b2 import B2
-from .b3 import B3
-
 
 __all__ = [
     'LeNet5',
@@ -160,46 +117,4 @@ __all__ = [
     'Vig',
     'PyramidVig',
     'XCiT',
-    
-    'Carrot',
-    
-    'CustomResNet',
-    'SwinLikeResNet',
-    'SwinLikeDWResNet',
-    'SwinLikeRescaleDWResNet',
-    'ODSwinLikeDWResNet',
-    'CustomConvMixer',
-    'A1',
-    'A2',
-    'A3',
-    'A4',
-    'A4_2',
-    'A5',
-    'A6',
-    'A7',
-    'A8',
-    'A9',
-    'A10',
-    'A11',
-    'A12',
-    'A13',
-    'A14',
-    'A15',
-    'A16',
-    'A17',
-    'A18',
-    'A19',
-    'A20',
-    'A21',
-    'A30',
-    'A31',
-    'A32',
-    'A33',
-    'A34',
-    'A35',
-    'A36',
-    'A37',
-    'B1',
-    'B2',
-    'B3'
     ]

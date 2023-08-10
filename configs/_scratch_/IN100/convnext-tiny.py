@@ -1,5 +1,5 @@
 BATCH_SIZE = 128
-LEARNING_RATE = 1e-3 # original setting # custom setting 1e-3 
+LEARNING_RATE = 4e-3 # original setting # custom setting 1e-3 
 # [230620] 재실험 필요(original: 4e-3 / ours: 1e-3)  
 # [230620] lr:4e-3 사용시 학습붕괴 1e-3으로 변경
 MAX_EPOCHS = 100
@@ -7,30 +7,32 @@ VAL_INTERVAL = 1
 N_CLASSES = 100
 
 model = dict(
-    type='ImageClassifier',
-    backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1),
+    type='ImageClassifier', # ✅
+    backbone=dict(type='ConvNeXt', arch='tiny', drop_path_rate=0.1), # ✅
     head=dict(
-        type='LinearClsHead',
-        num_classes=N_CLASSES,
-        in_channels=768,
+        type='LinearClsHead', # ✅
+        num_classes=N_CLASSES, # ✅
+        in_channels=768, # ✅
         loss=dict(
-            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
-        init_cfg=None),
+            type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'), # ✅
+        init_cfg=None # ✅
+        ),
     init_cfg=dict(
-        type='TruncNormal', layer=['Conv2d', 'Linear'], std=0.02, bias=0.0),
+        type='TruncNormal', layer=['Conv2d', 'Linear'], std=0.02, bias=0.0), # ✅
     train_cfg=dict(augments=[
         dict(type='Mixup', alpha=0.8),
         dict(type='CutMix', alpha=1.0)
-    ]))
+    ]) # ✅
+    )
 
 
 data_preprocessor = dict(
-    num_classes=N_CLASSES,
-    mean=[123.675, 116.28, 103.53],
-    std=[58.395, 57.12, 57.375],
+    num_classes=N_CLASSES, # ✅
+    mean=[123.675, 116.28, 103.53], # ✅
+    std=[58.395, 57.12, 57.375], # ✅
     to_rgb=True)
-bgr_mean = data_preprocessor['mean'][::-1]
-bgr_std = data_preprocessor['std'][::-1]
+bgr_mean = data_preprocessor['mean'][::-1] # ✅
+bgr_std = data_preprocessor['std'][::-1] # ✅
 
 
 train_pipeline = [
@@ -73,7 +75,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=BATCH_SIZE,
+    batch_size=BATCH_SIZE, # ✅
     num_workers=5,
     dataset=dict(
         type='ImageNet',
@@ -99,35 +101,36 @@ test_evaluator = val_evaluator
 
 optim_wrapper = dict(
     optimizer=dict(
-        type='AdamW',
-        lr=LEARNING_RATE,
-        weight_decay=0.05,
-        eps=1e-08,
-        betas=(0.9, 0.999)),
+        type='AdamW', # ✅
+        lr=LEARNING_RATE, # ✅
+        weight_decay=0.05, # ✅
+        eps=1e-08, # ✅
+        betas=(0.9, 0.999)), # ✅
     paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
+        norm_decay_mult=0.0, # ✅
+        bias_decay_mult=0.0, # ✅
+        flat_decay_mult=0.0, # ✅
         custom_keys=dict({
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
+            '.absolute_pos_embed': dict(decay_mult=0.0), # ✅
+            '.relative_position_bias_table': dict(decay_mult=0.0) # ✅
         })),
-    clip_grad=dict(max_norm=10e1000))
+    clip_grad=None # ✅
+    )
 
 param_scheduler = [
     dict(
-        type='LinearLR',
-        start_factor=0.001,
-        by_epoch=True,
-        end=20,
-        convert_to_iter_based=True),
-    dict(type='CosineAnnealingLR', eta_min=1e-05, by_epoch=True, begin=20)
+        type='LinearLR', # ✅
+        start_factor=0.001, # ✅
+        by_epoch=True, # ✅
+        end=20, # ✅
+        convert_to_iter_based=True), # ✅
+    dict(type='CosineAnnealingLR', eta_min=1e-05, by_epoch=True, begin=20) # ✅
 ]
 
-train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL)
+train_cfg = dict(by_epoch=True, max_epochs=MAX_EPOCHS, val_interval=VAL_INTERVAL) # ✅
 val_cfg = dict()
 test_cfg = dict()
-auto_scale_lr = dict(base_batch_size=4096) # 원래값 convnextT config에서는 64
+auto_scale_lr = dict(base_batch_size=4096) # ✅
 
 default_scope = 'mmpretrain'
 default_hooks = dict(
@@ -146,12 +149,12 @@ visualizer = dict(type='UniversalVisualizer',
                   vis_backends=[
                       dict(
                           type='WandbVisBackend', 
-                          init_kwargs=dict(entity='brotherhoon88',
-                                           project='IN100', # check
-                                           name='config_carrot-cifar100'))])
+                          init_kwargs=dict(entity='draph-khh',
+                                           project='classification', # check
+                                           name='convenxt-tiny'))])
 log_level = 'INFO'
 load_from = None
 resume = False
-randomness = dict(seed=None, deterministic=False)
-custom_hooks = [dict(type='EMAHook', momentum=0.0001, priority='ABOVE_NORMAL')]
+randomness = dict(seed=42, deterministic=False) # ✅
+custom_hooks = [dict(type='EMAHook', momentum=0.0001, priority='ABOVE_NORMAL')] # ✅
 
